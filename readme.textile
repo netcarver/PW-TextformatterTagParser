@@ -38,7 +38,7 @@ The value of _fieldname_ can be any field accessible in any context or from the 
 |_. Special Tag |_. Description |
 | {datetime} | The current date & time as formatted according to the dateFormat value in your site's config.php file. |
 
-Special tags override other context fields with the same name so if you want to include the datetime from one of your context objects you need to specify the context in the tag.
+Special tags override other context fields with the same name so if you want to include the datetime from one of your context objects you need to specify the context in the tag (eg. "{login.datetime}").
 
 h2. Usage
 
