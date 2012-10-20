@@ -44,7 +44,7 @@ h2. Usage
 
 h3. Single context:
 
-bc.. $parser = $modules->get("TextformatterTagParser"); 
+bc.. $parser = wire()->modules->get("TextformatterTagParser"); 
 $parser
     ->set('context', $user)
     ->format($string)
@@ -52,7 +52,7 @@ $parser
 
 h3. Multiple contexts:
   
-bc.. $parser = $modules->get("TextformatterTagParser"); 
+bc.. $parser = wire()->modules->get("TextformatterTagParser"); 
 $parser
     ->set('context', array('user'=>$user, 'page'=>$page) )
     ->format($string)
@@ -69,7 +69,7 @@ $parser
     ->format($subject)
     ->format($body)
     ;
-$sent = @email($to, $subject, $body);
+$sent = @email($user->email, $subject, $body);
 
 p. You can even setup new contexts on a given parser instance between format() calls.
 
