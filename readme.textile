@@ -8,11 +8,11 @@ Given an input string such as:
 
 bc. "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
 
-...and a user object as context, you can get this as the result:
+...and a user object as context, you might get something like this as the result
 
-bc..  "Date: 12th September 2012
+bc.. Date: 12th September 2012
 User: ryan
-IP:   127.0.0.1"
+IP:   127.0.0.1
 
 
 h2. Installation
@@ -24,7 +24,6 @@ h2. Installation
 # Click on the name "TextformatterTagParser" in the message that appears or scroll to the bottom of the screen to locate the correct entry
 # Click the "Install" button.
 
-That's it.
 
 h2. Usage
 
@@ -32,8 +31,8 @@ h3. Tags
 
 Tags must take one of the forms...
 
-# {_fieldname_} 
-# {_context_._fieldname_}
+# {fieldname} 
+# {context.fieldname}
 
 The first form can be used regardless of how many contexts are setup in the parser, whilst the second form is used to specified which context to extract the fieldname from when using multiple contexts.
 For example, {page.name} is more specific than just {name}. If no context specifier is used in a tag then contexts will be searched for a match in the order in which they appear in the context array and the first match will be used for the substitution.
