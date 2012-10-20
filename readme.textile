@@ -1,24 +1,19 @@
 h1. Tag Parsing Textformatter Module For ProcessWire
 
-Substitutes tags in a given text block with values from a context (or 
- * an array of contexts).
- *
- * Each context provider must be an instance of WireData. This means that 
- * almost any object from ProcessWire can be used by the parser to do 
- * substitutions.
- *
- * Given an input string such as: 
- *
- *   "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
- *
- * ...and a user object as context, you can get this as the result:
- *
- *   "Date: 12th September 2012
- *    User: ryan
- *    IP:   127.0.0.1"
- *
- * 
- 
+Substitutes tags in a given text block with values from a context (or an array of contexts).
+
+Each context provider must be an instance of WireData. This means that almost any object from ProcessWire can be used by the parser to do substitutions.
+
+Given an input string such as: 
+
+bc. "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
+
+...and a user object as context, you can get this as the result:
+
+bc..  "Date: 12th September 2012
+   User: ryan
+   IP:   127.0.0.1"
+
 
 h2. Installation
 
