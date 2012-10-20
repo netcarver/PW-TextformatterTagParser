@@ -52,7 +52,9 @@ bc. $parser->set('context', $user);
 
 h3. Setting multiple contexts:
   
-bc. $parser->set('context', array('user'=>$user, 'page'=>$page) )
+bc. $parser->set('context', array('user'=>$user, 'page'=>$page) );
+
+If you are using multiple contexts, you will probably need to use the _{context.fieldname}_ tag format in your input strings to avoid ambiguity when the parser looks for substitutions.
 
 h3. Parsing a string:
 
@@ -66,8 +68,8 @@ h3. Putting it together:
 
 You can format as many blocks as you want with a given parser & context...
 
-bc.. $body = "...";
-$subject = "...";
+bc.. $body = "...";    // Setup the email body template
+$subject = "..."; // Setup the email subject template
 $parser = wire()->modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
@@ -76,7 +78,7 @@ $parser
     ;
 $sent = @email($user->email, $subject, $body);
 
-p. You can even setup new contexts on a given parser instance between format() calls.
+p. You can setup new contexts on a given parser instance between format() calls.
 
 h2. License
 
