@@ -64,8 +64,6 @@ You can format as many blocks as you want with a given parser & context...
 
 bc.. $body = "...";
 $subject = "...";
-
-$parser = $modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
     ->format($subject)
@@ -73,6 +71,7 @@ $parser
     ;
 $sent = @email($to, $subject, $body);
 
+p. You can even setup new contexts on a given parser instance between format() calls.
 
 h2. License
 
