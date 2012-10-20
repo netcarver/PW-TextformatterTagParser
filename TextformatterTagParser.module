@@ -48,7 +48,8 @@
  *
  */
 
-class TextformatterTagParser extends Textformatter {
+class TextformatterTagParser extends Textformatter
+{
 
 	protected $data = array(
 		'context' => array(),
@@ -83,8 +84,8 @@ class TextformatterTagParser extends Textformatter {
 	 * $str  is the template to be parsed for {tags}
 	 * $objs can be a single WireData object or an array of WireData objects from which {tags} will be substituted
 	 */
-	public static function parseTags($str, $objs, $urlencode = false) 
-	{
+	public static function parseTags($str, $objs, $urlencode = false) {
+
 		if(strpos($str, '{') === false) return $str; 
 		if(!preg_match_all('/\{([-_a-z0-9.]+)\}/i', $str, $matches)) return $str;
 
@@ -140,14 +141,14 @@ class TextformatterTagParser extends Textformatter {
 	}
 
 
-	public function __get($key) {
+	public function get($key) {
 		return isset($this->data[$key]) ? $this->data[$key] : null;
 	}
 
-	/* public function __set($key, $value) { */
-	/* 	$this->data[$key] = $value; */
-	/* 	return $this; */
-	/* } */
+	public function set($key, $value) {
+		$this->data[$key] = $value;
+		return $this;
+	}
 
 }
 
