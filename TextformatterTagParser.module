@@ -21,8 +21,8 @@
  *    IP:   127.0.0.1"
  *
  * 
- * OO USAGE
- * --------
+ * USAGE
+ * -----
  *
  * Single context:
  *   $parser = $modules->get("TextformatterTagParser"); 
@@ -144,7 +144,8 @@ class TextformatterTagParser extends Textformatter {
 	}
 
 	public function __set($key, $value) {
-		$this->data[$key] = $value; 
+		$this->data[$key] = $value;
+		return $this;
 	}
 
 }
