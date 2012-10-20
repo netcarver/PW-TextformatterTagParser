@@ -11,8 +11,8 @@ bc. "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
 ...and a user object as context, you can get this as the result:
 
 bc..  "Date: 12th September 2012
-   User: ryan
-   IP:   127.0.0.1"
+User: ryan
+IP:   127.0.0.1"
 
 
 h2. Installation
@@ -32,8 +32,8 @@ h3. Tags
 
 Tags must take one of the forms...
 
-# {[_fieldname_]} 
-# {[_context_].[_fieldname_]}
+# {_fieldname_} 
+# {_context_._fieldname_}
 
 The first form can be used regardless of how many contexts are setup in the parser, whilst the second form is used to specified which context to extract the fieldname from when using multiple contexts.
 For example, {page.name} is more specific than just {name}. If no context specifier is used in a tag then contexts will be searched for a match in the order in which they appear in the context array and the first match will be used for the substitution.
