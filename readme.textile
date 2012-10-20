@@ -62,12 +62,17 @@ h3. Multiple format calls:
 
 You can format as many blocks as you want with a given parser & context...
 
-bc.. $parser = $modules->get("TextformatterTagParser");
+bc.. $body = "...";
+$subject = "...";
+
+$parser = $modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
     ->format($subject)
     ->format($body)
     ;
+$sent = @email($to, $subject, $body);
+
 
 h2. License
 
