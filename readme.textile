@@ -8,7 +8,7 @@ bc. "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
 
 ...and a user object as context, you might get something like this as the result...
 
-bc.. Date: 12th September 2012
+bc.. Date: 12th September 2012, 14:45
 User: ryan
 IP:   127.0.0.1
 
@@ -31,8 +31,14 @@ Tags must take one of the forms...
 # {fieldname} 
 # {context.fieldname}
 
-The first form can be used regardless of how many contexts are setup in the parser, whilst the second form is used to specified which context to extract the fieldname from when using multiple contexts.
-For example, {page.name} is more specific than just {name}. If no context specifier is used in a tag then contexts will be searched for a match in the order in which they appear in the context array and the first match will be used for the substitution.
+The first form can be used regardless of how many contexts are setup in the parser, whilst the second form is used to specified which context to extract the fieldname from when using multiple contexts. For example, {page.name} is more specific than just {name}. If no context specifier is used in a tag then contexts will be searched for a match in the order in which they appear in the context array and the first match will be used for the substitution.
+
+The value of _fieldname_ can be any field accessible in any context or from the $_SERVER globals or one of the following special fields...
+
+|_. Special Tag |_. Description |
+| {datetime} | The current date & time as formatted according to the dateFormat value in your site's config.php file. |
+
+Special tags override other context fields with the same name so if you want to include the datetime from one of your context objects you need to specify the context in the tag.
 
 h2. Usage
 
