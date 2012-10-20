@@ -1,0 +1,118 @@
+<?php
+
+/**
+ * ProcessWire Tag Parser Module
+ *
+ * Substitutes tags in a given text block with values from a context.
+ * 
+ * USAGE
+ * -----
+ * $parser = $modules->get("TextformatterTagParser"); 
+ * $parser
+ *   ->set('context', array('user'=>$user, 'roles'=>$roles) )
+ *   ->set('encode', true)
+ *   ->format($string1)
+ *   ->format($string2)
+ *   ;
+ *
+ */
+
+class TextformatterTagParser extends Textformatter {
+
+	protected $data = array(
+		'context' => array(),
+		'encode'  => false,
+	);
+
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Tag Parser', 
+			'version' => 1, 
+			'summary' => "Substitutes tags in a given text block with values from a context.",
+			'autoload' => false,
+			'singluar' => false,
+			'permanent' => false,
+		); 
+	}
+
+
+	public function format(&$str) {
+		$str = self::parseTags($str, $this->data['context'], $this->data['encode']); 
+	}
+
+
+
+	/**
+	 * Parse {tags} from any number of PW WireData objects or $_SERVER variables
+	 *
+	 * $str  is the template to be parsed for {tags}
+	 * $objs can be a single WireData object or an array of WireData objects from which {tags} will be substituted
+	 */
+	public static function parseTags($str, $objs, $urlencode = false) 
+	{
+		if(strpos($str, '{') === false) return $str; 
+		if(!preg_match_all('/\{([-_a-z0-9.]+)\}/i', $str, $matches)) return $str;
+
+		if($objs instanceof WireData) $objs = array( $objs );
+
+		foreach($matches[1] as $key => $tag) {
+
+			// If no substitute can be found, the tag will remain unchanged.
+			$value = $tag;
+
+			if($tag == 'datetime') {
+				$value = date($this->config->dateFormat); 
+
+			} else if(isset($_SERVER[$tag])) {
+				$value = $this->sanitizer->text($_SERVER[$tag]); 
+
+			} else if(is_array($objs) && !empty($objs)) {
+
+				/** 
+				 * We will search for $tag in the array of WireData objects.
+				 *
+				 * Does the tag have a specifier? 
+				 * The tag {user.name} calls for the name parameter from the WireData object indexed as 'user' in the $objs array
+				 */
+				$tag_parts = explode('.', $tag);
+				$n = count($tag_parts);           // Only valid values of n are 1 (no specifier) or 2 (for a single specifier)
+
+				if(1==$n) {                       // No specifier; search through the array. First hit will be used as the value for the tag
+					foreach($objs as $o) {
+						if(!($o instanceof WireData)) continue;
+						$temp = $o->get($tag);
+						if(isset($temp)) {
+							$value = (string) $temp;
+							break;
+						}
+					}
+				}
+				else if(2==$n) {                  // Found a specifier so select tag from that object in the $objs array (if present)
+					$o = @$objs[ $tag_parts[0] ];
+					if($o instanceof WireData) {
+						$temp = $o->get($tag_parts[1]);
+						if(isset($temp)) $value = (string) $temp;
+					}
+				}
+			}
+
+			if($urlencode) $value = urlencode($value);
+
+			$str = str_replace($matches[0][$key], $value, $str); 	
+		}
+
+		return $str; 
+	}
+
+
+	public function __get($key) {
+		return isset($this->data[$key]) ? $this->data[$key] : null;
+	}
+
+	public function __set($key, $value) {
+		$this->data[$key] = $value; 
+	}
+
+}
+
