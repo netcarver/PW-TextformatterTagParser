@@ -1,0 +1,75 @@
+h1. Tag Parsing Textformatter Module For ProcessWire
+
+Substitutes tags in a given text block with values from a context (or 
+ * an array of contexts).
+ *
+ * Each context provider must be an instance of WireData. This means that 
+ * almost any object from ProcessWire can be used by the parser to do 
+ * substitutions.
+ *
+ * Given an input string such as: 
+ *
+ *   "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
+ *
+ * ...and a user object as context, you can get this as the result:
+ *
+ *   "Date: 12th September 2012
+ *    User: ryan
+ *    IP:   127.0.0.1"
+ *
+ * 
+ 
+
+h2. Installation
+
+# Copy TextformatterTagParser.module to your site/modules directory
+# Login to the admin interface
+# Navigate to the modules page
+# Click the "Check for new modules"
+# Click on the name "TextformatterTagParser" in the message that appears or scroll to the bottom of the screen to locate the correct entry
+# Click the "Install" button.
+
+That's it.
+
+h2. Usage
+
+h3. Tags
+
+Tags must take one of the forms...
+
+# {[_fieldname_]} 
+# {[_context_].[_fieldname_]}
+
+The first form can be used regardless of how many contexts are setup in the parser, whilst the second form is used to specified which context to extract the fieldname from when using multiple contexts.
+For example, {page.name} is more specific than just {name}. If no context specifier is used in a tag then contexts will be searched for a match in the order in which they appear in the context array and the first match will be used for the substitution.
+
+h3. Single context:
+
+bc.. $parser = $modules->get("TextformatterTagParser"); 
+$parser
+    ->set('context', $user)
+    ->format($string)
+    ;
+
+h3. Multiple contexts:
+  
+bc.. $parser = $modules->get("TextformatterTagParser"); 
+$parser
+    ->set('context', array('user'=>$user, 'page'=>$page) )
+    ->format($string)
+    ;
+
+h3. Multiple format calls:
+
+You can format as many blocks as you want with a given parser & context...
+
+bc.. $parser = $modules->get("TextformatterTagParser");
+$parser
+    ->set('context', $user)
+    ->format($subject)
+    ->format($body)
+    ;
+
+h2. License
+
+GPLv2
