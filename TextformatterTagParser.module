@@ -44,9 +44,8 @@
  * for a match in the order in which they appear in the context array and
  * the first match will be used for the substitution.
  *
+ * @copyright Copyright (c) 2012, Netcarver (https://github.com/netcarver)
  *
- * By Netcarver.
- * www.github.com/netcarver
  */
 
 class TextformatterTagParser extends Textformatter {
@@ -71,6 +70,7 @@ class TextformatterTagParser extends Textformatter {
 
 
 	public function format(&$str) {
+		if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
 		$str = self::parseTags($str, $this->data['context'], $this->data['encode']);
 		return $this;
 	}
@@ -96,10 +96,10 @@ class TextformatterTagParser extends Textformatter {
 			$value = $tag;
 
 			if($tag == 'datetime') {
-				$value = date($this->config->dateFormat); 
+				$value = date(wire()->config->dateFormat); 
 
 			} else if(isset($_SERVER[$tag])) {
-				$value = $this->sanitizer->text($_SERVER[$tag]); 
+				$value = wire()->sanitizer->text($_SERVER[$tag]); 
 
 			} else if(is_array($objs) && !empty($objs)) {
 
@@ -144,10 +144,10 @@ class TextformatterTagParser extends Textformatter {
 		return isset($this->data[$key]) ? $this->data[$key] : null;
 	}
 
-	public function __set($key, $value) {
-		$this->data[$key] = $value;
-		return $this;
-	}
+	/* public function __set($key, $value) { */
+	/* 	$this->data[$key] = $value; */
+	/* 	return $this; */
+	/* } */
 
 }
 
