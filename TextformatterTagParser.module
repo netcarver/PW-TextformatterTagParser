@@ -3,18 +3,51 @@
 /**
  * ProcessWire Tag Parser Module
  *
- * Substitutes tags in a given text block with values from a context.
- * 
- * USAGE
- * -----
- * $parser = $modules->get("TextformatterTagParser"); 
- * $parser
- *   ->set('context', array('user'=>$user, 'roles'=>$roles) )
- *   ->set('encode', true)
- *   ->format($string1)
- *   ->format($string2)
- *   ;
+ * Substitutes tags in a given text block with values from a context (or array of contexts).
  *
+ * Each context provider must be an instance of WireData. This means that almost any object from
+ * ProcessWire can be used by the parser to do substitutions.
+ *
+ * Given an input string such as: 
+ *   "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
+ *
+ * ...and a user object as context, you can get this as the result:
+ *   "Date: 12th September 2012
+ *    User: ryan
+ *    IP:   127.0.0.1"
+ *
+ * 
+ * OO USAGE
+ * --------
+ *
+ * Single context:
+ *   $parser = $modules->get("TextformatterTagParser"); 
+ *   $parser
+ *     ->set('context', $user)
+ *     ->format($string)
+ *     ;
+ *
+ * Multiple contexts:
+ *   $parser = $modules->get("TextformatterTagParser"); 
+ *   $parser
+ *     ->set('context', array('user'=>$user, 'page'=>$page) )
+ *     ->format($string)
+ *     ;
+ *
+ * When using multiple contexts your tags can specify the context
+ * to use: {user.name} which is more specific than just {name}. If no 
+ * context specifier is used then contexts will be searched for a
+ * match in the order in which they appear in the context array and the
+ * first match will be used for the substitution.
+ *
+ * Procedural Usage
+ * ----------------
+ * 
+ *   $modules->get("TextformatterTagParser"); // To load the file
+ *   $string = TextformatterTagParser::parseTags($string, $user);
+ *
+ * By Netcarver.
+ * www.github.com/netcarver
  */
 
 class TextformatterTagParser extends Textformatter {
