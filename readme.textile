@@ -42,28 +42,33 @@ Special tags override other context fields with the same name so if you want to 
 
 h2. Usage
 
-h3. Single context:
+h3. Getting a parser object:
 
-bc.. $parser = wire()->modules->get("TextformatterTagParser"); 
-$parser
-    ->set('context', $user)
-    ->format($string)
-    ;
+bc. $parser = wire()->modules->get("TextformatterTagParser"); 
 
-h3. Multiple contexts:
+h3. Setting a single context:
+
+bc. $parser->set('context', $user);
+
+h3. Setting multiple contexts:
   
-bc.. $parser = wire()->modules->get("TextformatterTagParser"); 
-$parser
-    ->set('context', array('user'=>$user, 'page'=>$page) )
-    ->format($string)
-    ;
+bc. $parser->set('context', array('user'=>$user, 'page'=>$page) )
 
-h3. Multiple format calls:
+h3. Parsing a string:
+
+Parsing is done after setting a context using the format() method.
+
+bc. $parser->format($string);
+
+*NB:* The string is passed to format() by reference and *the value is changed* by the parser.
+
+h3. Putting it together:
 
 You can format as many blocks as you want with a given parser & context...
 
 bc.. $body = "...";
 $subject = "...";
+$parser = wire()->modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
     ->format($subject)
