@@ -3,15 +3,19 @@
 /**
  * ProcessWire Tag Parser Module
  *
- * Substitutes tags in a given text block with values from a context (or array of contexts).
+ * Substitutes tags in a given text block with values from a context (or 
+ * an array of contexts).
  *
- * Each context provider must be an instance of WireData. This means that almost any object from
- * ProcessWire can be used by the parser to do substitutions.
+ * Each context provider must be an instance of WireData. This means that 
+ * almost any object from ProcessWire can be used by the parser to do 
+ * substitutions.
  *
  * Given an input string such as: 
+ *
  *   "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
  *
  * ...and a user object as context, you can get this as the result:
+ *
  *   "Date: 12th September 2012
  *    User: ryan
  *    IP:   127.0.0.1"
@@ -35,16 +39,11 @@
  *     ;
  *
  * When using multiple contexts your tags can specify the context
- * to use: {user.name} which is more specific than just {name}. If no 
- * context specifier is used then contexts will be searched for a
- * match in the order in which they appear in the context array and the
- * first match will be used for the substitution.
+ * to use. For example, {page.name} is more specific than just {name}. If 
+ * no context specifier is used in a tag then contexts will be searched 
+ * for a match in the order in which they appear in the context array and
+ * the first match will be used for the substitution.
  *
- * Procedural Usage
- * ----------------
- * 
- *   $modules->get("TextformatterTagParser"); // To load the file
- *   $string = TextformatterTagParser::parseTags($string, $user);
  *
  * By Netcarver.
  * www.github.com/netcarver
@@ -60,12 +59,13 @@ class TextformatterTagParser extends Textformatter {
 
 	public static function getModuleInfo() {
 		return array(
-			'title' => 'Tag Parser', 
-			'version' => 1, 
-			'summary' => "Substitutes tags in a given text block with values from a context.",
-			'autoload' => false,
-			'singluar' => false,
+			'title'     => 'Tag Parser', 
+			'version'   => 1, 
+			'summary'   => "Substitutes tags in a given text block with values from a context.",
 			'permanent' => false,
+			'singluar'  => false,
+			'autoload'  => false,
+			'author'    => 'Netcarver',
 		); 
 	}
 
