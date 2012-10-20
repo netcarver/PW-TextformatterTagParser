@@ -71,7 +71,8 @@ class TextformatterTagParser extends Textformatter {
 
 
 	public function format(&$str) {
-		$str = self::parseTags($str, $this->data['context'], $this->data['encode']); 
+		$str = self::parseTags($str, $this->data['context'], $this->data['encode']);
+		return $this;
 	}
 
 
