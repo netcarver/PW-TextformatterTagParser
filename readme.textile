@@ -58,7 +58,7 @@ If you are using multiple contexts, you will probably need to use the _{context.
 
 h3. Parsing a string:
 
-Parsing is done after setting a context using the format() method.
+Parsing is done using the format() method.
 
 bc. $parser->format($string);
 
@@ -68,13 +68,13 @@ h3. Putting it together:
 
 You can format as many blocks as you want with a given parser & context...
 
-bc.. $body = "...";    // Setup the email body template
-$subject = "..."; // Setup the email subject template
+bc.. $body = "Hi {firstname} and welcome to our service. You can login using your username {name} and password.";
+$subject = "Welcome {name}";
 $parser = wire()->modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
-    ->format($subject)
-    ->format($body)
+    ->format($subject)      // make $subject specific to this user
+    ->format($body)         // make $body specific to them too
     ;
 $sent = @email($user->email, $subject, $body);
 
