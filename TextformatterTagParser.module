@@ -70,6 +70,13 @@ class TextformatterTagParser extends Textformatter
 	}
 
 
+	/**
+	 * Format the input string
+	 *
+	 * @param string $str The block of text, with embedded tags, to parse
+	 *
+	 * The incoming string is replaced with the formatted version of itself.
+	 **/
 	public function format(&$str) {
 		if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
 		$str = self::parseTags($str, $this->data['context'], $this->data['encode']);
@@ -81,8 +88,11 @@ class TextformatterTagParser extends Textformatter
 	/**
 	 * Parse {tags} from any number of PW WireData objects or $_SERVER variables
 	 *
-	 * $str  is the template to be parsed for {tags}
-	 * $objs can be a single WireData object or an array of WireData objects from which {tags} will be substituted
+	 * @param string $str The template (block of text) to be parsed for {tags}
+	 * @param array|WireData $objs This can be a single WireData object or an array of WireData objects from which {tags} will be substituted
+	 * @param bool $urlencode Determines if urlencoding should be applied to every value substituted into the input text
+	 * @return string The template with tags replaced by (possibly transformed) values from the given contexts
+	 *
 	 */
 	public static function parseTags($str, $objs, $urlencode = false) {
 
@@ -156,6 +166,9 @@ class TextformatterTagParser extends Textformatter
 	 *
 	 * {specifier.field|xform}
 	 *
+	 * @param  string $tag_in The contents of the tag as found between the '{' ... '}' chars
+	 * @return array  Contains the actual fieldname, the context specifier and an array (possibly empty) of transformation names
+	 *
 	 **/
 	protected static function splitTag($tag_in) {
 
@@ -180,7 +193,12 @@ class TextformatterTagParser extends Textformatter
 
 
 	/**
-	 * Allows a limited set of transformations to be applied to the input
+	 * Allows a set of transformations to be applied to the input
+	 *
+	 * @param  string $in The value to be transformed
+	 * @param  array  $xforms An array of transformation names to be applied to $in
+	 * @param  bool   $global_urlencode If true, stops any specific url transform from being applied (and thus having the value encoded twice)
+	 * @return string The transformed version of $in (if any transformation needed)
 	 **/
 	protected static function xformValue($in, $xforms, $global_urlencode=false) {
 
