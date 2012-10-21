@@ -26,7 +26,7 @@ h2. Installation
 
 h2. Tags
 
-Tags must take one of the forms...
+You can embed tags in the input text block in the positions in which you'd like the parser to make a substitution from the context it has been given. These tags are always formed by matched curly braces and must take one of these forms...
 
 # {fieldname} 
 # {context.fieldname}
@@ -50,6 +50,8 @@ h3. Setting a single context:
 
 bc. $parser->set('context', $user);
 
+If you are only setting a single context then the shorter _{fieldname}_ tag format will be sufficient for the parser.
+
 h3. Setting multiple contexts:
   
 bc. $parser->set('context', array('user'=>$user, 'page'=>$page) );
@@ -63,6 +65,14 @@ Parsing is done using the format() method.
 bc. $parser->format($string);
 
 *NB:* The string is passed to format() by reference and *the value is changed* by the parser.
+
+h3. URLEncoding substitutions:
+
+If you are formatting something that needs the substitutions to be URL encoded just...
+
+bc. $parser->set('encode', true);
+
+p. ...and the parser will encode as it goes. By default, the parser will not perform any encoding.
 
 h3. Putting it together:
 
