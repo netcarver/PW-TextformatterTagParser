@@ -164,7 +164,18 @@ class TextformatterTagParser extends Textformatter
 	/**
 	 * Split the tag into possible parts...
 	 *
-	 * {specifier.field|xform}
+	 * Given this input "{specifier.field1|field2>xform1>xform2}" We'd get this as output...
+	 *
+	 *    array( 
+	 *      'field1|field2', // A PW selector used to pull the field from part of the context.
+	 *      'specifier',     // If present, specifies which part of the context to search first. 
+	 *                       // If not present (or not found in a specific context) a search through all 
+	 *                       // supplied contexts will be performed.
+	 *      array(           // An array of transformation names to apply when substituting (if any). 
+	 *        'xform1',      // These are applied in order, first to last.
+	 *        'xform2',
+	 *      ),
+	 *    )
 	 *
 	 * @param  string $tag_in The contents of the tag as found between the '{' ... '}' chars
 	 * @return array  Contains the actual fieldname, the context specifier and an array (possibly empty) of transformation names
