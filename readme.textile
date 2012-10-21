@@ -44,15 +44,15 @@ h2. Transformation Of Tag Values
 
 It is possible to have the parser apply a number of transformations to the value used to replace a given tag. You can specify a transformation by appending it to the end of the tag like this @{name>upper}@ or @{page.name>title}@.
 
-You can chain transformations so: @{title>lower>url}@ which will lowercase the title field value and then URL encode it.
+You can chain transformations so: @{page.title>lower>url}@ which will lowercase the title field value and then URL encode it.
 
 |_. Transformation |_. Description |
 | lower | Runs the value through @mb_strtolower()@ |
 | upper | Runs the value through @mb_strtoupper()@ |
-| title | Runs the value through @mb_caseconvert( , MB_CASE_TITLE, )@ |
+| title | Runs the value through @mb_convert_case( , MB_CASE_TITLE, )@ |
 | url   | URL encodes the value unless URL encoding is set globally |
-| base64 | base64 encodes the value |
-| strip | Runs the value through @strip_tags@ |
+| base64 | Base64 encodes the value |
+| strip | Runs the value through @strip_tags()@ |
 
 h2. Usage
 
