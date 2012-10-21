@@ -198,6 +198,9 @@ class TextformatterTagParser extends Textformatter
 		case "title" :
 			$result = mb_convert_case($in, MB_CASE_TITLE, "UTF-8");
 			break;
+		case "url" :
+			$result = urlencode($in);
+			break;
 		default:
 			break;
 		}

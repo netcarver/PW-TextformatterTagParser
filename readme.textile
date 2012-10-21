@@ -42,7 +42,7 @@ Special tags override other context fields with the same name so if you want to 
 
 h2. Transformation Of Tag Values
 
-It is possible to have the parser apply a limited number of transformations to the value used to replace a given tag. Currently, the transformations are limited to 'upper', 'lower' and 'title' and these make the value all lowercase, all uppercase or titlecase respectively. You can specify a transformation by appending it to the end of the tag like this @{name|upper}@ or @{page.name|title}@.
+It is possible to have the parser apply a limited number of transformations to the value used to replace a given tag. Currently, the transformations are limited to 'upper', 'lower', 'title' & 'url' and these make the value all lowercase, all uppercase, all title-case or urlencoded respectively. You can specify a transformation by appending it to the end of the tag like this @{name|upper}@ or @{page.name|title}@.
 
 h2. Usage
 
@@ -72,11 +72,11 @@ bc. $parser->format($string);
 
 h3. URL encode substitutions:
 
-If you are formatting something that needs the substitutions to be URL encoded just...
+If you are formatting something that needs all the substitutions to be URL encoded just...
 
 bc. $parser->set('encode', true);
 
-p. ...and the parser will encode as it goes. By default, the parser will not perform any encoding.
+p. ...and the parser will encode as it goes. By default, the parser will only perform url encoding if your tag has the 'url' transformation specified on it, like this; @{page.title|url}@.
 
 h3. Putting it together:
 
