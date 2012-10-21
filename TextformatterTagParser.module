@@ -87,22 +87,26 @@ class TextformatterTagParser extends Textformatter
 	public static function parseTags($str, $objs, $urlencode = false) {
 
 		if(strpos($str, '{') === false) return $str; 
-		if(!preg_match_all('/\{([-_a-z0-9.]+)\}/i', $str, $matches)) return $str;
+		if(!preg_match_all('/\{([-_a-z0-9.|]+)\}/i', $str, $matches)) return $str;
 
 		if($objs instanceof WireData) $objs = array( $objs );
 
 		foreach($matches[1] as $key => $tag) {
 
+			list( $tag, $specifier, $xform ) = self::splitTag($tag);
+
 			// If no substitute can be found, the tag will remain unchanged.
 			$value = $tag;
 
 			if($tag == 'datetime') {
-				$value = date(wire()->config->dateFormat); 
+				$value = date(wire()->config->dateFormat);
 
 			} else if(isset($_SERVER[$tag])) {
 				$value = wire()->sanitizer->text($_SERVER[$tag]); 
 
 			} else if(is_array($objs) && !empty($objs)) {
+
+				$found = false;
 
 				/** 
 				 * We will search for $tag in the array of WireData objects.
@@ -110,26 +114,32 @@ class TextformatterTagParser extends Textformatter
 				 * Does the tag have a specifier? 
 				 * The tag {user.name} calls for the name parameter from the WireData object indexed as 'user' in the $objs array
 				 */
-				$tag_parts = explode('.', $tag);
-				$n = count($tag_parts);           // Only valid values of n are 1 (no specifier) or 2 (for a single specifier)
-
-				if(1==$n) {                       // No specifier; search through the array. First hit will be used as the value for the tag
-					foreach($objs as $o) {
-						if(!($o instanceof WireData)) continue;
+				if($specifier) {
+					$o = @$objs[ $specifier ];
+					if($o instanceof WireData) {
 						$temp = $o->get($tag);
 						if(isset($temp)) {
 							$value = (string) $temp;
+							$found = true;
+						}
+					}
+				}
+
+				if(!$found) {
+					// Search through the array. First hit will be used as the value for the tag
+					foreach($objs as $o) {
+						if(!($o instanceof WireData)) continue;		
+						$temp = $o->get($tag);
+						if(isset($temp)) {
+							$value = (string) $temp;
+							$found = true;
 							break;
 						}
 					}
 				}
-				else if(2==$n) {                  // Found a specifier so select tag from that object in the $objs array (if present)
-					$o = @$objs[ $tag_parts[0] ];
-					if($o instanceof WireData) {
-						$temp = $o->get($tag_parts[1]);
-						if(isset($temp)) $value = (string) $temp;
-					}
-				}
+
+				if($found && ('' != $xform))
+					$value = self::xformValue($value, $xform);
 			}
 
 			if($urlencode) $value = urlencode($value);
@@ -138,6 +148,61 @@ class TextformatterTagParser extends Textformatter
 		}
 
 		return $str; 
+	}
+
+
+	/**
+	 * Split the tag into possible parts...
+	 *
+	 * {specifier.field|xform}
+	 *
+	 **/
+	protected static function splitTag($tag_in) {
+
+		$tag       = $tag_in;
+		$specifier = '';
+		$xform     = '';
+
+		$tag_parts = explode( '.', $tag_in );
+		$n = count( $tag_parts );
+		if (2==$n) {
+			$specifier = $tag_parts[0];
+			$tag       = $tag_parts[1];
+		}
+
+		$tag_parts = explode( '|', $tag );
+		$n = count( $tag_parts );
+		if (2==$n) {
+			$tag   = $tag_parts[0]; 
+			$xform = strtolower($tag_parts[1]);
+		}
+
+		$result = array( $tag, $specifier, $xform );
+		return $result;
+	}
+
+
+	/**
+	 * Allows a limited set of transformations to be applied to the input
+	 **/
+	protected static function xformValue($in, $xform) {
+
+		$result = $in;
+		switch($xform) {
+		case "lower" :
+			$result = mb_strtolower($in);
+			break;
+		case "upper" :
+			$result = mb_strtoupper($in);
+			break;
+		case "title" :
+			$result = mb_convert_case($in, MB_CASE_TITLE, "UTF-8");
+			break;
+		default:
+			break;
+		}
+
+		return $result;
 	}
 
 

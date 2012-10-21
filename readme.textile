@@ -24,7 +24,7 @@ h2. Installation
 # Click the "Install" button.
 
 
-h2. Tags
+h2. Tags In The Input
 
 You can embed tags in the input text block in the positions in which you'd like the parser to make a substitution from the context it has been given. These tags are always formed by matched curly braces and must take one of these forms...
 
@@ -39,6 +39,10 @@ The value of _fieldname_ can be any field accessible in any context or from the 
 | {datetime} | The current date & time as formatted according to the dateFormat value in your site's config.php file. |
 
 Special tags override other context fields with the same name so if you want to include the datetime from one of your context objects you need to specify the context in the tag (eg. "{login.datetime}").
+
+h2. Transformation Of Tag Values
+
+It is possible to have the parser apply a limited number of transformations to the value used to replace a given tag. Currently, the transformations are limited to 'upper', 'lower' and 'title' and these make the value all lowercase, all uppercase or titlecase respectively. You can specify a transformation by appending it to the end of the tag like this @{name|upper}@ or @{page.name|title}@.
 
 h2. Usage
 
