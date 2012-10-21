@@ -66,7 +66,7 @@ bc. $parser->format($string);
 
 *NB:* The string is passed to format() by reference and *the value is changed* by the parser.
 
-h3. URLEncoding substitutions:
+h3. URL encode substitutions:
 
 If you are formatting something that needs the substitutions to be URL encoded just...
 
