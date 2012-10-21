@@ -92,8 +92,8 @@ h3. Putting it together:
 
 You can format as many blocks as you want with a given parser & context...
 
-bc.. $body = "Hi {firstname} and welcome to our service. You can login using your username {name} and password.";
-$subject = "Welcome {name}";
+bc.. $body = "Hi {firstname>title} and welcome to our service. You can login using your username {name} and password.";
+$subject = "Welcome {name>title}";
 $parser = wire()->modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
