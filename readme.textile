@@ -42,7 +42,9 @@ Special tags override other context fields with the same name so if you want to 
 
 h2. Transformation Of Tag Values
 
-It is possible to have the parser apply a limited number of transformations to the value used to replace a given tag. Currently, the transformations are limited to 'upper', 'lower', 'title' & 'url' and these make the value all lowercase, all uppercase, all title-case or urlencoded respectively. You can specify a transformation by appending it to the end of the tag like this @{name|upper}@ or @{page.name|title}@.
+It is possible to have the parser apply a limited number of transformations to the value used to replace a given tag. You can specify a transformation by appending it to the end of the tag like this @{name>upper}@ or @{page.name>title}@.
+
+You can chain transformations so: @{title>lower>url}@ which will lowercase the title field value and then URL encode it.
 
 h2. Usage
 

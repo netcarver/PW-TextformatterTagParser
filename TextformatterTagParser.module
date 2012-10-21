@@ -60,7 +60,7 @@ class TextformatterTagParser extends Textformatter
 	public static function getModuleInfo() {
 		return array(
 			'title'     => 'Tag Parser', 
-			'version'   => 100, 
+			'version'   => 110, 
 			'summary'   => "Substitutes tags in a given text block with values from a context.",
 			'permanent' => false,
 			'singluar'  => false,
@@ -87,13 +87,13 @@ class TextformatterTagParser extends Textformatter
 	public static function parseTags($str, $objs, $urlencode = false) {
 
 		if(strpos($str, '{') === false) return $str; 
-		if(!preg_match_all('/\{([-_a-z0-9.|]+)\}/i', $str, $matches)) return $str;
+		if(!preg_match_all('/\{([-_a-z0-9.|>]+)\}/i', $str, $matches)) return $str;
 
 		if($objs instanceof WireData) $objs = array( $objs );
 
 		foreach($matches[1] as $key => $tag) {
 
-			list( $tag, $specifier, $xform ) = self::splitTag($tag);
+			list( $tag, $specifier, $xforms ) = self::splitTag($tag);
 
 			// If no substitute can be found, the tag will remain unchanged.
 			$value = $tag;
@@ -138,8 +138,8 @@ class TextformatterTagParser extends Textformatter
 					}
 				}
 
-				if($found && ('' != $xform))
-					$value = self::xformValue($value, $xform);
+				if($found && !empty($xforms))
+					$value = self::xformValue($value, $xforms, $urlencode);
 			}
 
 			if($urlencode) $value = urlencode($value);
@@ -170,12 +170,9 @@ class TextformatterTagParser extends Textformatter
 			$tag       = $tag_parts[1];
 		}
 
-		$tag_parts = explode( '|', $tag );
-		$n = count( $tag_parts );
-		if (2==$n) {
-			$tag   = $tag_parts[0]; 
-			$xform = strtolower($tag_parts[1]);
-		}
+		$tag_parts = explode( '>', $tag );
+		$tag = array_shift($tag_parts); 
+		$xform = $tag_parts;
 
 		$result = array( $tag, $specifier, $xform );
 		return $result;
@@ -185,24 +182,34 @@ class TextformatterTagParser extends Textformatter
 	/**
 	 * Allows a limited set of transformations to be applied to the input
 	 **/
-	protected static function xformValue($in, $xform) {
+	protected static function xformValue($in, $xforms, $global_urlencode=false) {
 
 		$result = $in;
-		switch($xform) {
-		case "lower" :
-			$result = mb_strtolower($in);
-			break;
-		case "upper" :
-			$result = mb_strtoupper($in);
-			break;
-		case "title" :
-			$result = mb_convert_case($in, MB_CASE_TITLE, "UTF-8");
-			break;
-		case "url" :
-			$result = urlencode($in);
-			break;
-		default:
-			break;
+
+		while(!empty($xforms)) {
+			$xform = strtolower(array_shift($xforms));
+			switch($xform) {
+			case "lower" :
+				$result = mb_strtolower($result);
+				break;
+			case "upper" :
+				$result = mb_strtoupper($result);
+				break;
+			case "title" :
+				$result = mb_convert_case($result, MB_CASE_TITLE, "UTF-8");
+				break;
+			case "url" :
+				if(!$global_urlencode) $result = urlencode($result);
+				break;
+			case "strip" :
+				$result = strip_tags($result);
+				break;
+			case "base64" :
+				$result = base64_encode($result);
+				break;
+			default:
+				break;
+			}
 		}
 
 		return $result;
