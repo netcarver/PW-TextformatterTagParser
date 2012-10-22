@@ -135,7 +135,7 @@ class TextformatterTagParser extends Textformatter
 					}
 				}
 
-				if(!$found) {
+				if(!$found && !$specifier) {
 					// Search through the array. First hit will be used as the value for the tag
 					foreach($objs as $o) {
 						if(!($o instanceof WireData)) continue;		
