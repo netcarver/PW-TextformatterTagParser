@@ -60,7 +60,7 @@ class TextformatterTagParser extends Textformatter
 	public static function getModuleInfo() {
 		return array(
 			'title'     => 'Tag Parser', 
-			'version'   => 110, 
+			'version'   => 111, 
 			'summary'   => "Substitutes tags in a given text block with values from a context.",
 			'permanent' => false,
 			'singluar'  => false,
