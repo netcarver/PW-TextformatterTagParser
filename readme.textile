@@ -86,7 +86,7 @@ If you are formatting something that needs all the substitutions to be URL encod
 
 bc. $parser->set('encode', true);
 
-p. ...and the parser will encode as it goes. By default, the parser will only perform url encoding if your tag has the 'url' transformation specified on it, like this; @{page.title|url}@.
+p. ...and the parser will encode as it goes. By default, the parser will only perform url encoding if your tag has the 'url' transformation specified on it, like this; @{page.title>url}@.
 
 h3. Putting it together:
 
