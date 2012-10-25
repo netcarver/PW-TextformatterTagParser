@@ -51,16 +51,39 @@
 class TextformatterTagParser extends Textformatter
 {
 
+	/**
+	 * Data for this instanace of the parser to use.
+	 *
+	 * Holds the context at a bare minimum. Other possible values are
+	 * 'debug' or any of the possible transformation names as found in
+	 * $xform_whitelist.
+	 **/
 	protected $data = array(
 		'context' => array(),
-		'encode'  => false,
+	);
+
+
+	/**
+	 * Global whitelist of allowable transformations.
+	 *
+	 * If you extend this list, you will need to supply a transformation handler (see later)
+	 **/
+	static $xform_whitelist = array(
+		'lower',
+		'upper',
+		'title',
+		'url',
+		'strip',
+		'base64',
+		'email',
+		'html',
 	);
 
 
 	public static function getModuleInfo() {
 		return array(
 			'title'     => 'Tag Parser', 
-			'version'   => 111, 
+			'version'   => 120,
 			'summary'   => "Substitutes tags in a given text block with values from a context.",
 			'permanent' => false,
 			'singluar'  => false,
@@ -68,6 +91,7 @@ class TextformatterTagParser extends Textformatter
 			'author'    => 'Netcarver',
 		); 
 	}
+
 
 
 	/**
@@ -78,8 +102,9 @@ class TextformatterTagParser extends Textformatter
 	 * The incoming string is replaced with the formatted version of itself.
 	 **/
 	public function format(&$str) {
+		$this->multiple = is_callable('mb_strlen');
 		if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
-		$str = self::parseTags($str, $this->data['context'], $this->data['encode']);
+		$str = $this->parseTags($str);
 		return $this;
 	}
 
@@ -89,19 +114,22 @@ class TextformatterTagParser extends Textformatter
 	 * Parse {tags} from any number of PW WireData objects or $_SERVER variables
 	 *
 	 * @param string $str The template (block of text) to be parsed for {tags}
-	 * @param array|WireData $objs This can be a single WireData object or an array of WireData objects from which {tags} will be substituted
-	 * @param bool $urlencode Determines if urlencoding should be applied to every value substituted into the input text
 	 * @return string The template with tags replaced by (possibly transformed) values from the given contexts
 	 *
 	 */
-	public static function parseTags($str, $objs, $urlencode = false) {
+	public function parseTags($str) {
 
 		if(strpos($str, '{') === false) return $str; 
 		if(!preg_match_all('/\{([-_a-z0-9.|>]+)\}/i', $str, $matches)) return $str;
 
+		$objs = $this->data['context'];
+		//$urlencode = isset($data['encode']) ? $data['encode'] : false;
+
 		if($objs instanceof WireData) $objs = array( $objs );
 
 		foreach($matches[1] as $key => $tag) {
+
+			$this->xform_stack = array();
 
 			list( $tag, $specifier, $xforms ) = self::splitTag($tag);
 
@@ -149,10 +177,15 @@ class TextformatterTagParser extends Textformatter
 				}
 
 				if($found && !empty($xforms))
-					$value = self::xformValue($value, $xforms, $urlencode);
+					$value = $this->xformValue($value, $xforms);
 			}
 
-			if($urlencode) $value = urlencode($value);
+			// Apply "global transformations..."
+			//if($urlencode) $value = urlencode($value);
+			$value = $this->globalTransforms($value);
+
+			if($this->data['debug'])
+				$value .= " (" . implode(" > ", $this->xform_stack) . ")";
 
 			$str = str_replace($matches[0][$key], $value, $str); 	
 		}
@@ -203,56 +236,84 @@ class TextformatterTagParser extends Textformatter
 	}
 
 
-	/**
-	 * Allows a set of transformations to be applied to the input
-	 *
-	 * @param  string $in The value to be transformed
-	 * @param  array  $xforms An array of transformation names to be applied to $in
-	 * @param  bool   $global_urlencode If true, stops any specific url transform from being applied (and thus having the value encoded twice)
-	 * @return string The transformed version of $in (if any transformation needed)
-	 **/
-	protected static function xformValue($in, $xforms, $global_urlencode=false) {
+	protected function globalTransforms($in) {
 
-		$mb = is_callable("mb_strlen");
 		$result = $in;
 
-		while(!empty($xforms)) {
-			$xform = strtolower(array_shift($xforms));
-			switch($xform) {
-			case "lower" :
-				$result = ($mb) ? mb_strtolower($result) : strtolower($result);
-				break;
-			case "upper" :
-				$result = ($mb) ? mb_strtoupper($result) : strtoupper($result);
-				break;
-			case "title" :
-				$result = ($mb) ? mb_convert_case($result, MB_CASE_TITLE, "UTF-8") : ucwords($result);
-				break;
-			case "url" :
-				if(!$global_urlencode) $result = urlencode($result);
-				break;
-			case "strip" :
-				$result = strip_tags($result);
-				break;
-			case "base64" :
-				$result = base64_encode($result);
-				break;
-			default:
-				break;
-			}
+		foreach(self::$xform_whitelist as $xform) {
+			if(!$this->data[$xform]) continue;       // no global flag set for this transformation
+
+			$xform = "xform" . ucwords($xform);
+			if(!is_callable(array($this, $xform))) throw new WireException("No '$xform' handler found.");
+
+			$result = $this->$xform($result);
+		    $this->xform_stack[] = "*$xform";
 		}
 
 		return $result;
 	}
 
 
+	/**
+	 * Allows a set of transformations to be applied to the input
+	 *
+	 * @param  string $in The value to be transformed
+	 * @param  array  $xforms An array of transformation names to be applied to $in
+	 * @param  bool   $check  If true, stops any specific url transform from being applied (and thus having the value encoded twice)
+	 * @return string The transformed version of $in (if any transformation needed)
+	 **/
+	protected function xformValue($in, $xforms, $check=true) {
+
+		$result = $in;
+
+		while(!empty($xforms)) {
+			$xform = trim(strtolower(array_shift($xforms)));
+
+			if(!in_array($xform, self::$xform_whitelist)) continue;    // invalid transormation
+			if($check && @$this->data[$xform])            continue;    // skip as this transformation is going to be done later
+
+			$xform = "xform" . ucwords(strtolower($xform));
+			if(!is_callable(array($this, $xform))) throw new WireException("No '$xform' handler found.");
+
+			$result = $this->$xform($result);
+		    $this->xform_stack[] = $xform;
+		}
+
+		return $result;
+	}
+
+
+	/**
+	 * Transformation handlers...
+	 **/
+	public function xformLower($str)  { return ($this->multibyte) ? mb_strtolower($str) : strtolower($str); }
+	public function xformUpper($str)  { return ($this->multibyte) ? mb_strtoupper($str) : strtoupper($str); }
+	public function xformTitle($str)  { return ($this->multibyte) ? mb_convert_case($str, MB_CASE_TITLE, 'UTF-8') : ucwords($str); }
+	public function xformUrl($str)    { return urlencode($str); }
+	public function xformStrip($str)  { return strip_tags($str); }
+	public function xformBase64($str) { return base64_encode($str); }
+	public function xformHtml($str)   { return htmlspecialchars($str, ENT_QUOTES, 'UTF-8'); }
+	public function xformEmail($str)  {
+		$str = str_replace("\r",   "\n", trim($str)); // \r\n => \n\n & \r => \n
+		$str = str_replace("\n\n", "\n", $str);       // \n\n => \n
+		$p = explode("\n", $str);                     // array of lines split on \r, \n or \r\n
+		return trim($p[0]); // limit output to single line (and trim it too)
+	}
+
+
 	public function get($key) {
+		if('encode'==$key) $key = 'url';	// encode deprecated but still supported, use 'url' instead.
 		return isset($this->data[$key]) ? $this->data[$key] : null;
 	}
 
 	public function set($key, $value) {
+		if('encode'==$key) $key = 'url';
 		$this->data[$key] = $value;
 		return $this;
+	}
+
+	public static function getTransformations() {
+		return self::$xform_whitelist;
 	}
 
 }
