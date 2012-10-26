@@ -42,7 +42,7 @@ Special tags override other context fields with the same name so if you want to 
 
 h2. Transformation Of Tag Values
 
-It is possible to have the parser apply a number of transformations to the value used to replace a given tag. You can specify a transformation by appending it to the end of the tag like this @{name>upper}@ or @{page.name>title}@.
+It is possible to have the parser apply a number of transformations to the value used to replace a given tag. You can specify a transformation to perform on the substituted value of a tag by appending it to the end of the tag like this @{name>upper}@ or @{page.name>title}@.
 
 You can chain transformations so: @{page.title>lower>url}@ which will lowercase the title field value and then URL encode it.
 
@@ -51,8 +51,13 @@ You can chain transformations so: @{page.title>lower>url}@ which will lowercase 
 | upper | Runs the value through @mb_strtoupper()@ or @strtoupper()@ |
 | title | Runs the value through @mb_convert_case( , MB_CASE_TITLE, )@ or @ucwords()@ |
 | url   | URL encodes the value unless URL encoding is set globally |
+| encode | A deprecated alias for the 'url' transformation |
 | base64 | Base64 encodes the value |
 | strip | Runs the value through @strip_tags()@ |
+| email | Limits substitution to a single, trimmed line. Several possible line-ending characters are taken into account when splitting the substituted value into a single line. |
+| html | Runs the value through @htmlspecialchars( , ENT_QUOTES, 'utf-8' )@ |
+
+You can also specify which of the above are to be applied to *all* the substitutions in a text by setting that transform name to true on the parser (see usage example.)
 
 h2. Usage
 
@@ -80,13 +85,13 @@ bc. $parser->format($string);
 
 *NB:* The string is passed to format() by reference and *the value is changed* by the parser.
 
-h3. URL encode substitutions:
+h3. Setting transfomrations for all substitutions:
 
-If you are formatting something that needs all the substitutions to be URL encoded just...
+If you are formatting something that needs all the substitutions to be transformed in a certain manner you just...
 
-bc. $parser->set('encode', true);
+bc. $parser->set('url', true);
 
-p. ...and the parser will encode as it goes. By default, the parser will only perform url encoding if your tag has the 'url' transformation specified on it, like this; @{page.title>url}@.
+p. ...and the parser will apply the transformation as it goes. You can set as many or few as needed.
 
 h3. Putting it together:
 
@@ -97,12 +102,17 @@ $subject = "Welcome {name>title}";
 $parser = wire()->modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
+    ->set('email', true)    // apply the email transformation to all substituted values
     ->format($subject)      // make $subject specific to this user
     ->format($body)         // make $body specific to them too
     ;
 $sent = @email($user->email, $subject, $body);
 
 p. You can setup new contexts on a given parser instance between format() calls.
+
+h3. Debug output
+
+If you'd like to see a trail of which transformations were applied by the parser do a @$parser->set('debug', true)@ before you call @format()@.
 
 h2. License
 
