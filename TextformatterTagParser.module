@@ -138,9 +138,11 @@ class TextformatterTagParser extends Textformatter
 
 			if($tag == 'datetime') {
 				$value = date(wire()->config->dateFormat);
+				$found = true;	
 
 			} else if(isset($_SERVER[$tag])) {
-				$value = wire()->sanitizer->text($_SERVER[$tag]); 
+				$value = wire()->sanitizer->text($_SERVER[$tag]);
+				$found = true;	
 
 			} else if(is_array($objs) && !empty($objs)) {
 
@@ -175,17 +177,17 @@ class TextformatterTagParser extends Textformatter
 						}
 					}
 				}
-
-				if($found && !empty($xforms))
-					$value = $this->xformValue($value, $xforms);
 			}
+
+			if($found && !empty($xforms))
+				$value = $this->xformValue($value, $xforms);
 
 			// Apply "global transformations..."
 			//if($urlencode) $value = urlencode($value);
 			$value = $this->globalTransforms($value);
 
 			if($this->data['debug'])
-				$value .= " (" . implode(" > ", $this->xform_stack) . ")";
+				$value .= (count($this->xform_stack)) ? " (" . implode(" > ", $this->xform_stack) . ")" : " (verbatim)" ;
 
 			$str = str_replace($matches[0][$key], $value, $str); 	
 		}
@@ -236,6 +238,10 @@ class TextformatterTagParser extends Textformatter
 	}
 
 
+
+	/**
+	 * Any transformation that is setup to be applied to all substitutions will now be applied...
+	 **/
 	protected function globalTransforms($in) {
 
 		$result = $in;
