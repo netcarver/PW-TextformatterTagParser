@@ -102,8 +102,9 @@ $subject = "Welcome {name>title}";
 $parser = wire()->modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
-    ->set('email', true)    // apply the email transformation to all substituted values
+    ->set('email', true)    // apply the email transformation to all substituted values in the subject to prevent header injections
     ->format($subject)      // make $subject specific to this user
+    ->set('email', false)   // no need in the body
     ->format($body)         // make $body specific to them too
     ;
 $sent = @email($user->email, $subject, $body);
