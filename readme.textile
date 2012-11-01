@@ -115,6 +115,10 @@ h3. Debug output
 
 If you'd like to see a trail of which transformations were applied by the parser do a @$parser->set('debug', true)@ before you call @format()@.
 
+h2. Helper Module
+
+There is a small "test module":https://github.com/netcarver/PW-ProcessTagParserTest available that allows you to experiment with this module from within a ProcessWire installation.
+
 h2. License
 
 GPLv2
