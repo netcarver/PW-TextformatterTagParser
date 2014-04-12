@@ -56,6 +56,9 @@ You can chain transformations so: @{page.title>lower>url}@ which will lowercase 
 | strip | Runs the value through @strip_tags()@ |
 | email | Limits substitution to a single, trimmed line. Several possible line-ending characters are taken into account when splitting the substituted value into a single line. |
 | html | Runs the value through @htmlspecialchars( , ENT_QUOTES, 'utf-8' )@ |
+| initial | Returns the initial letter of the string |
+| initcap | Returns the initial letter of the string capitalised |
+| thinspaces | Thins out multiple spaces, replacing them with a single space |
 
 You can also specify which of the above are to be applied to *all* the substitutions in a text by setting that transform name to true on the parser (see usage example.)
 
