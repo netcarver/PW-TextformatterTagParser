@@ -250,7 +250,9 @@ class TextformatterTagParser extends Textformatter
 		$result = $in;
 
 		foreach(self::$xform_whitelist as $xform) {
-			if(!$this->data[$xform]) continue;       // no global flag set for this transformation
+            if(!isset($this->data[$xform])) {
+                continue;       // no global flag set for this transformation
+            }
 
 			$xform = "xform" . ucwords($xform);
 			if(!is_callable(array($this, $xform))) throw new WireException("No '$xform' handler found.");
