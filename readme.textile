@@ -59,6 +59,7 @@ You can chain transformations so: @{page.title>lower>url}@ which will lowercase 
 | initial | Returns the initial letter of the string |
 | initcap | Returns the initial letter of the string capitalised |
 | thinspaces | Thins out multiple spaces, replacing them with a single space |
+| (integer) _n_ | Select the [*n*][^th^] word from the input string |
 
 You can also specify which of the above are to be applied to *all* the substitutions in a text by setting that transform name to true on the parser (see usage example.)
 
@@ -101,7 +102,7 @@ h3. Putting it together:
 You can format as many blocks as you want with a given parser & context...
 
 bc.. $body = "Hi {firstname>title} and welcome to our service. You can login using your username {name} and password.";
-$subject = "Welcome {name>title}";
+$subject = "Welcome {name>1>title}"; // Show the first word of the name in title case.
 $parser = wire()->modules->get("TextformatterTagParser");
 $parser
     ->set('context', $user)
