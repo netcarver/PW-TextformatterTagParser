@@ -79,6 +79,8 @@ class TextformatterTagParser extends Textformatter
         'html',
         'initial',
         'initcap',
+        'initials',
+        'initcaps',
         'thinspaces',
     );
 
@@ -336,6 +338,26 @@ class TextformatterTagParser extends Textformatter
     {
         $str = $this->xformUpper(substr($str, 0, 1));
         return (strlen($str)) ? $str . '.' : '';
+    }
+
+
+    public function xformInitials($str)
+    {
+        $words = explode(' ', $str);
+        foreach ($words as &$w) {
+            $w = substr($w, 0, 1);
+        }
+        return implode(' ', $words);
+    }
+
+
+    public function xformInitcaps($str)
+    {
+        $words = explode(' ', $str);
+        foreach ($words as &$w) {
+            $w = $this->xformUpper(substr($w, 0, 1)) . '.';
+        }
+        return implode(' ', $words);
     }
 
 

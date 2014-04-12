@@ -57,7 +57,9 @@ You can chain transformations so: @{page.title>lower>url}@ which will lowercase 
 | email | Limits substitution to a single, trimmed line. Several possible line-ending characters are taken into account when splitting the substituted value into a single line. |
 | html | Runs the value through @htmlspecialchars( , ENT_QUOTES, 'utf-8' )@ |
 | initial | Returns the initial letter of the string |
-| initcap | Returns the initial letter of the string capitalised |
+| initcap | Returns the initial letter of the string capitalised and postfixed with '.' |
+| initials | Returns the initial letters of each word of the field |
+| initcaps | Returns the initial letters of each word of the field capitalised and postfixed with '.' |
 | thinspaces | Thins out multiple spaces, replacing them with a single space |
 | (integer) _n_ | Select the [*n*][^th^] word from the input string |
 
