@@ -89,7 +89,7 @@ class TextformatterTagParser extends Textformatter
     {
         return array(
             'title'     => 'Tag Parser', 
-            'version'   => 130,
+            'version'   => 140,
             'summary'   => "Substitutes tags in a given text block with values from a context.",
             'permanent' => false,
             'singluar'  => false,
