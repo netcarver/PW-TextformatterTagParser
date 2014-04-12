@@ -83,7 +83,8 @@ class TextformatterTagParser extends Textformatter
 	);
 
 
-	public static function getModuleInfo() {
+	public static function getModuleInfo()
+    {
 		return array(
 			'title'     => 'Tag Parser', 
 			'version'   => 130,
@@ -104,7 +105,8 @@ class TextformatterTagParser extends Textformatter
 	 *
 	 * The incoming string is replaced with the formatted version of itself.
 	 **/
-	public function format(&$str) {
+	public function format(&$str)
+    {
 		$this->multiple = is_callable('mb_strlen');
 		if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
 		$str = $this->parseTags($str);
@@ -120,35 +122,39 @@ class TextformatterTagParser extends Textformatter
 	 * @return string The template with tags replaced by (possibly transformed) values from the given contexts
 	 *
 	 */
-	public function parseTags($str) {
+	public function parseTags($str)
+    {
+        if (strpos($str, '{') === false) {
+            return $str;
+        }
 
-		if(strpos($str, '{') === false) return $str; 
-		if(!preg_match_all('/\{([-_a-z0-9.|>]+)\}/i', $str, $matches)) return $str;
+        if (!preg_match_all('/\{([-_a-z0-9.|>]+)\}/i', $str, $matches)) {
+            return $str;
+        }
 
 		$objs = $this->data['context'];
 		//$urlencode = isset($data['encode']) ? $data['encode'] : false;
 
-		if($objs instanceof WireData) $objs = array( $objs );
+        if ($objs instanceof WireData) {
+            $objs = array( $objs );
+        }
 
-		foreach($matches[1] as $key => $tag) {
-
+		foreach ($matches[1] as $key=>$tag) {
 			$this->xform_stack = array();
-
-			list( $tag, $specifier, $xforms ) = self::splitTag($tag);
+			list ($tag, $specifier, $xforms) = self::splitTag($tag);
 
 			// If no substitute can be found, the tag will remain unchanged.
 			$value = $tag;
 
-			if($tag == 'datetime') {
+			if ($tag == 'datetime') {
 				$value = date(wire()->config->dateFormat);
 				$found = true;	
 
-			} else if(isset($_SERVER[$tag])) {
+			} else if (isset($_SERVER[$tag])) {
 				$value = wire()->sanitizer->text($_SERVER[$tag]);
 				$found = true;	
 
-			} else if(is_array($objs) && !empty($objs)) {
-
+			} else if (is_array($objs) && !empty($objs)) {
 				$found = false;
 
 				/** 
@@ -157,23 +163,26 @@ class TextformatterTagParser extends Textformatter
 				 * Does the tag have a specifier? 
 				 * The tag {user.name} calls for the name parameter from the WireData object indexed as 'user' in the $objs array
 				 */
-				if($specifier) {
-					$o = @$objs[ $specifier ];
-					if($o instanceof WireData) {
+				if ($specifier) {
+					$o = @$objs[$specifier];
+					if ($o instanceof WireData) {
 						$temp = $o->get($tag);
-						if(isset($temp)) {
+						if (isset($temp)) {
 							$value = (string) $temp;
 							$found = true;
 						}
 					}
 				}
 
-				if(!$found && !$specifier) {
+				if (!$found && !$specifier) {
 					// Search through the array. First hit will be used as the value for the tag
-					foreach($objs as $o) {
-						if(!($o instanceof WireData)) continue;		
+					foreach ($objs as $o) {
+                        if (!($o instanceof WireData)) {
+                            continue;
+                        }
+
 						$temp = $o->get($tag);
-						if(isset($temp)) {
+						if (isset($temp)) {
 							$value = (string) $temp;
 							$found = true;
 							break;
@@ -182,15 +191,17 @@ class TextformatterTagParser extends Textformatter
 				}
 			}
 
-			if($found && !empty($xforms))
+			if ($found && !empty($xforms)) {
 				$value = $this->xformValue($value, $xforms);
+            }
 
 			// Apply "global transformations..."
 			//if($urlencode) $value = urlencode($value);
 			$value = $this->globalTransforms($value);
 
-			if($this->data['debug'])
+			if ($this->data['debug']) {
 				$value .= (count($this->xform_stack)) ? " (" . implode(" > ", $this->xform_stack) . ")" : " (verbatim)" ;
+            }
 
 			$str = str_replace($matches[0][$key], $value, $str); 	
 		}
@@ -219,24 +230,24 @@ class TextformatterTagParser extends Textformatter
 	 * @return array  Contains the actual fieldname, the context specifier and an array (possibly empty) of transformation names
 	 *
 	 **/
-	protected static function splitTag($tag_in) {
-
+	protected static function splitTag($tag_in)
+    {
 		$tag       = $tag_in;
 		$specifier = '';
 		$xform     = '';
 
 		$tag_parts = explode( '.', $tag_in );
-		$n = count( $tag_parts );
+		$n = count($tag_parts);
 		if (2==$n) {
 			$specifier = $tag_parts[0];
 			$tag       = $tag_parts[1];
 		}
 
-		$tag_parts = explode( '>', $tag );
+		$tag_parts = explode('>', $tag);
 		$tag = array_shift($tag_parts); 
 		$xform = $tag_parts;
 
-		$result = array( $tag, $specifier, $xform );
+		$result = array($tag, $specifier, $xform);
 		return $result;
 	}
 
@@ -245,17 +256,19 @@ class TextformatterTagParser extends Textformatter
 	/**
 	 * Any transformation that is setup to be applied to all substitutions will now be applied...
 	 **/
-	protected function globalTransforms($in) {
-
+	protected function globalTransforms($in)
+    {
 		$result = $in;
 
-		foreach(self::$xform_whitelist as $xform) {
-            if(!isset($this->data[$xform])) {
+		foreach (self::$xform_whitelist as $xform) {
+            if (!isset($this->data[$xform])) {
                 continue;       // no global flag set for this transformation
             }
 
 			$xform = "xform" . ucwords($xform);
-			if(!is_callable(array($this, $xform))) throw new WireException("No '$xform' handler found.");
+            if (!is_callable(array($this, $xform))) {
+                throw new WireException("No '$xform' handler found.");
+            }
 
 			$result = $this->$xform($result);
 			$this->xform_stack[] = "*$xform";
@@ -273,11 +286,11 @@ class TextformatterTagParser extends Textformatter
 	 * @param  bool   $check  If true, stops any specific url transform from being applied (and thus having the value encoded twice)
 	 * @return string The transformed version of $in (if any transformation needed)
 	 **/
-	protected function xformValue($in, $xforms, $check=true) {
-
+	protected function xformValue($in, $xforms, $check=true)
+    {
 		$result = $in;
 
-		while(!empty($xforms)) {
+		while (!empty($xforms)) {
 			$xform = trim(strtolower(array_shift($xforms)));
 
             if (is_numeric($xform)) {
@@ -313,17 +326,69 @@ class TextformatterTagParser extends Textformatter
 	/**
 	 * Transformation handlers...
      **/
-    public function xformInitial($str)    { return substr($str, 0, 1); }
-    public function xformInitcap($str)    { $str = $this->xformUpper(substr($str, 0, 1)); return (strlen($str)) ? $str . '.' : ''; }
-    public function xformThinspaces($str) { return preg_replace('-[ ]{2,}-', ' ', $str); }
-	public function xformLower($str)      { return ($this->multibyte) ? mb_strtolower($str) : strtolower($str); }
-	public function xformUpper($str)      { return ($this->multibyte) ? mb_strtoupper($str) : strtoupper($str); }
-	public function xformTitle($str)      { return ($this->multibyte) ? mb_convert_case($str, MB_CASE_TITLE, 'UTF-8') : ucwords($str); }
-	public function xformUrl($str)        { return urlencode($str); }
-	public function xformStrip($str)      { return strip_tags($str); }
-	public function xformBase64($str)     { return base64_encode($str); }
-	public function xformHtml($str)       { return htmlspecialchars($str, ENT_QUOTES, 'UTF-8'); }
-	public function xformEmail($str)      {
+    public function xformInitial($str)
+    {
+        return substr($str, 0, 1);
+    }
+
+
+    public function xformInitcap($str)
+    {
+        $str = $this->xformUpper(substr($str, 0, 1));
+        return (strlen($str)) ? $str . '.' : '';
+    }
+
+
+    public function xformThinspaces($str)
+    {
+        return preg_replace('-[ ]{2,}-', ' ', $str);
+    }
+
+
+    public function xformLower($str)
+    {
+        return ($this->multibyte) ? mb_strtolower($str) : strtolower($str);
+    }
+
+
+    public function xformUpper($str)
+    {
+        return ($this->multibyte) ? mb_strtoupper($str) : strtoupper($str);
+    }
+
+
+    public function xformTitle($str)
+    {
+        return ($this->multibyte) ? mb_convert_case($str, MB_CASE_TITLE, 'UTF-8') : ucwords($str);
+    }
+
+
+    public function xformUrl($str)
+    {
+        return urlencode($str);
+    }
+
+
+    public function xformStrip($str)
+    {
+        return strip_tags($str);
+    }
+
+
+    public function xformBase64($str)
+    {
+        return base64_encode($str);
+    }
+
+
+    public function xformHtml($str)
+    {
+        return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+    }
+
+
+    public function xformEmail($str)
+    {
 		$str = str_replace(array("\r", "<cr>", "<CR>", "<Cr>", "<cR>", "<lf>", "<Lf>", "<lF>", "<LF>", "0x0A", "0x0a", "0x0D", "0x0d", "%0A", "%0a", "%0D", "%0d"), "\n", trim($str)); // \r\n => \n\n & \r => \n
 		$str = str_replace("\n\n", "\n", $str);       // \n\n => \n
 		$p = explode("\n", $str);                     // array of lines split on \r, \n or \r\n
@@ -331,20 +396,29 @@ class TextformatterTagParser extends Textformatter
 	}
 
 
-	public function get($key) {
-		if('encode'==$key) $key = 'url';	// encode deprecated but still supported, use 'url' instead.
+	public function get($key)
+    {
+        if ('encode'==$key) {
+            $key = 'url';	// encode deprecated but still supported, use 'url' instead.
+        }
+
 		return isset($this->data[$key]) ? $this->data[$key] : null;
 	}
 
-	public function set($key, $value) {
-		if('encode'==$key) $key = 'url';
+
+	public function set($key, $value)
+    {
+        if ('encode'==$key) {
+            $key = 'url';
+        }
+
 		$this->data[$key] = $value;
 		return $this;
 	}
 
-	public static function getTransformations() {
+
+    public static function getTransformations()
+    {
 		return self::$xform_whitelist;
 	}
-
 }
-
