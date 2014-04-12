@@ -51,78 +51,78 @@
 class TextformatterTagParser extends Textformatter
 {
 
-	/**
-	 * Data for this instanace of the parser to use.
-	 *
-	 * Holds the context at a bare minimum. Other possible values are
-	 * 'debug' or any of the possible transformation names as found in
-	 * $xform_whitelist.
-	 **/
-	protected $data = array(
-		'context' => array(),
-	);
+    /**
+     * Data for this instanace of the parser to use.
+     *
+     * Holds the context at a bare minimum. Other possible values are
+     * 'debug' or any of the possible transformation names as found in
+     * $xform_whitelist.
+     **/
+    protected $data = array(
+        'context' => array(),
+    );
 
 
-	/**
-	 * Global whitelist of allowable transformations.
-	 *
-	 * If you extend this list, you will need to supply a transformation handler (see later)
-	 **/
-	static $xform_whitelist = array(
-		'lower',
-		'upper',
-		'title',
-		'url',
-		'strip',
-		'base64',
-		'email',
-		'html',
+    /**
+     * Global whitelist of allowable transformations.
+     *
+     * If you extend this list, you will need to supply a transformation handler (see later)
+     **/
+    static $xform_whitelist = array(
+        'lower',
+        'upper',
+        'title',
+        'url',
+        'strip',
+        'base64',
+        'email',
+        'html',
         'initial',
         'initcap',
         'thinspaces',
-	);
+    );
 
 
-	public static function getModuleInfo()
+    public static function getModuleInfo()
     {
-		return array(
-			'title'     => 'Tag Parser', 
-			'version'   => 130,
-			'summary'   => "Substitutes tags in a given text block with values from a context.",
-			'permanent' => false,
-			'singluar'  => false,
-			'autoload'  => false,
-			'author'    => 'Netcarver',
-		); 
-	}
+        return array(
+            'title'     => 'Tag Parser', 
+            'version'   => 130,
+            'summary'   => "Substitutes tags in a given text block with values from a context.",
+            'permanent' => false,
+            'singluar'  => false,
+            'autoload'  => false,
+            'author'    => 'Netcarver',
+        ); 
+    }
 
 
 
-	/**
-	 * Format the input string
-	 *
-	 * @param string $str The block of text, with embedded tags, to parse
-	 *
-	 * The incoming string is replaced with the formatted version of itself.
-	 **/
-	public function format(&$str)
+    /**
+     * Format the input string
+     *
+     * @param string $str The block of text, with embedded tags, to parse
+     *
+     * The incoming string is replaced with the formatted version of itself.
+     **/
+    public function format(&$str)
     {
-		$this->multiple = is_callable('mb_strlen');
-		if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
-		$str = $this->parseTags($str);
-		return $this;
-	}
+        $this->multiple = is_callable('mb_strlen');
+        if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
+        $str = $this->parseTags($str);
+        return $this;
+    }
 
 
 
-	/**
-	 * Parse {tags} from any number of PW WireData objects or $_SERVER variables
-	 *
-	 * @param string $str The template (block of text) to be parsed for {tags}
-	 * @return string The template with tags replaced by (possibly transformed) values from the given contexts
-	 *
-	 */
-	public function parseTags($str)
+    /**
+     * Parse {tags} from any number of PW WireData objects or $_SERVER variables
+     *
+     * @param string $str The template (block of text) to be parsed for {tags}
+     * @return string The template with tags replaced by (possibly transformed) values from the given contexts
+     *
+     */
+    public function parseTags($str)
     {
         if (strpos($str, '{') === false) {
             return $str;
@@ -132,166 +132,166 @@ class TextformatterTagParser extends Textformatter
             return $str;
         }
 
-		$objs = $this->data['context'];
-		//$urlencode = isset($data['encode']) ? $data['encode'] : false;
+        $objs = $this->data['context'];
+        //$urlencode = isset($data['encode']) ? $data['encode'] : false;
 
         if ($objs instanceof WireData) {
             $objs = array( $objs );
         }
 
-		foreach ($matches[1] as $key=>$tag) {
-			$this->xform_stack = array();
-			list ($tag, $specifier, $xforms) = self::splitTag($tag);
+        foreach ($matches[1] as $key=>$tag) {
+            $this->xform_stack = array();
+            list ($tag, $specifier, $xforms) = self::splitTag($tag);
 
-			// If no substitute can be found, the tag will remain unchanged.
-			$value = $tag;
+            // If no substitute can be found, the tag will remain unchanged.
+            $value = $tag;
 
-			if ($tag == 'datetime') {
-				$value = date(wire()->config->dateFormat);
-				$found = true;	
+            if ($tag == 'datetime') {
+                $value = date(wire()->config->dateFormat);
+                $found = true;	
 
-			} else if (isset($_SERVER[$tag])) {
-				$value = wire()->sanitizer->text($_SERVER[$tag]);
-				$found = true;	
+            } else if (isset($_SERVER[$tag])) {
+                $value = wire()->sanitizer->text($_SERVER[$tag]);
+                $found = true;	
 
-			} else if (is_array($objs) && !empty($objs)) {
-				$found = false;
+            } else if (is_array($objs) && !empty($objs)) {
+                $found = false;
 
-				/** 
-				 * We will search for $tag in the array of WireData objects.
-				 *
-				 * Does the tag have a specifier? 
-				 * The tag {user.name} calls for the name parameter from the WireData object indexed as 'user' in the $objs array
-				 */
-				if ($specifier) {
-					$o = @$objs[$specifier];
-					if ($o instanceof WireData) {
-						$temp = $o->get($tag);
-						if (isset($temp)) {
-							$value = (string) $temp;
-							$found = true;
-						}
-					}
-				}
+                /** 
+                 * We will search for $tag in the array of WireData objects.
+                 *
+                 * Does the tag have a specifier? 
+                 * The tag {user.name} calls for the name parameter from the WireData object indexed as 'user' in the $objs array
+                 */
+                if ($specifier) {
+                    $o = @$objs[$specifier];
+                    if ($o instanceof WireData) {
+                        $temp = $o->get($tag);
+                        if (isset($temp)) {
+                            $value = (string) $temp;
+                            $found = true;
+                        }
+                    }
+                }
 
-				if (!$found && !$specifier) {
-					// Search through the array. First hit will be used as the value for the tag
-					foreach ($objs as $o) {
+                if (!$found && !$specifier) {
+                    // Search through the array. First hit will be used as the value for the tag
+                    foreach ($objs as $o) {
                         if (!($o instanceof WireData)) {
                             continue;
                         }
 
-						$temp = $o->get($tag);
-						if (isset($temp)) {
-							$value = (string) $temp;
-							$found = true;
-							break;
-						}
-					}
-				}
-			}
-
-			if ($found && !empty($xforms)) {
-				$value = $this->xformValue($value, $xforms);
+                        $temp = $o->get($tag);
+                        if (isset($temp)) {
+                            $value = (string) $temp;
+                            $found = true;
+                            break;
+                        }
+                    }
+                }
             }
 
-			// Apply "global transformations..."
-			//if($urlencode) $value = urlencode($value);
-			$value = $this->globalTransforms($value);
-
-			if ($this->data['debug']) {
-				$value .= (count($this->xform_stack)) ? " (" . implode(" > ", $this->xform_stack) . ")" : " (verbatim)" ;
+            if ($found && !empty($xforms)) {
+                $value = $this->xformValue($value, $xforms);
             }
 
-			$str = str_replace($matches[0][$key], $value, $str); 	
-		}
+            // Apply "global transformations..."
+            //if($urlencode) $value = urlencode($value);
+            $value = $this->globalTransforms($value);
 
-		return $str; 
-	}
+            if ($this->data['debug']) {
+                $value .= (count($this->xform_stack)) ? " (" . implode(" > ", $this->xform_stack) . ")" : " (verbatim)" ;
+            }
+
+            $str = str_replace($matches[0][$key], $value, $str); 	
+        }
+
+        return $str; 
+    }
 
 
-	/**
-	 * Split the tag into possible parts...
-	 *
-	 * Given this input "{specifier.field1|field2>xform1>xform2}" We'd get this as output...
-	 *
-	 *    array( 
-	 *      'field1|field2', // A PW selector used to pull the field from part of the context.
-	 *      'specifier',     // If present, specifies which part of the context to search first. 
-	 *                       // If not present (or not found in a specific context) a search through all 
-	 *                       // supplied contexts will be performed.
-	 *      array(           // An array of transformation names to apply when substituting (if any). 
-	 *        'xform1',      // These are applied in order, first to last.
-	 *        'xform2',
-	 *      ),
-	 *    )
-	 *
-	 * @param  string $tag_in The contents of the tag as found between the '{' ... '}' chars
-	 * @return array  Contains the actual fieldname, the context specifier and an array (possibly empty) of transformation names
-	 *
-	 **/
-	protected static function splitTag($tag_in)
+    /**
+     * Split the tag into possible parts...
+     *
+     * Given this input "{specifier.field1|field2>xform1>xform2}" We'd get this as output...
+     *
+     *    array( 
+     *      'field1|field2', // A PW selector used to pull the field from part of the context.
+     *      'specifier',     // If present, specifies which part of the context to search first. 
+     *                       // If not present (or not found in a specific context) a search through all 
+     *                       // supplied contexts will be performed.
+     *      array(           // An array of transformation names to apply when substituting (if any). 
+     *        'xform1',      // These are applied in order, first to last.
+     *        'xform2',
+     *      ),
+     *    )
+     *
+     * @param  string $tag_in The contents of the tag as found between the '{' ... '}' chars
+     * @return array  Contains the actual fieldname, the context specifier and an array (possibly empty) of transformation names
+     *
+     **/
+    protected static function splitTag($tag_in)
     {
-		$tag       = $tag_in;
-		$specifier = '';
-		$xform     = '';
+        $tag       = $tag_in;
+        $specifier = '';
+        $xform     = '';
 
-		$tag_parts = explode( '.', $tag_in );
-		$n = count($tag_parts);
-		if (2==$n) {
-			$specifier = $tag_parts[0];
-			$tag       = $tag_parts[1];
-		}
+        $tag_parts = explode( '.', $tag_in );
+        $n = count($tag_parts);
+        if (2==$n) {
+            $specifier = $tag_parts[0];
+            $tag       = $tag_parts[1];
+        }
 
-		$tag_parts = explode('>', $tag);
-		$tag = array_shift($tag_parts); 
-		$xform = $tag_parts;
+        $tag_parts = explode('>', $tag);
+        $tag = array_shift($tag_parts); 
+        $xform = $tag_parts;
 
-		$result = array($tag, $specifier, $xform);
-		return $result;
-	}
+        $result = array($tag, $specifier, $xform);
+        return $result;
+    }
 
 
 
-	/**
-	 * Any transformation that is setup to be applied to all substitutions will now be applied...
-	 **/
-	protected function globalTransforms($in)
+    /**
+     * Any transformation that is setup to be applied to all substitutions will now be applied...
+     **/
+    protected function globalTransforms($in)
     {
-		$result = $in;
+        $result = $in;
 
-		foreach (self::$xform_whitelist as $xform) {
+        foreach (self::$xform_whitelist as $xform) {
             if (!isset($this->data[$xform])) {
                 continue;       // no global flag set for this transformation
             }
 
-			$xform = "xform" . ucwords($xform);
+            $xform = "xform" . ucwords($xform);
             if (!is_callable(array($this, $xform))) {
                 throw new WireException("No '$xform' handler found.");
             }
 
-			$result = $this->$xform($result);
-			$this->xform_stack[] = "*$xform";
-		}
+            $result = $this->$xform($result);
+            $this->xform_stack[] = "*$xform";
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
 
-	/**
-	 * Allows a set of transformations to be applied to the input
-	 *
-	 * @param  string $in The value to be transformed
-	 * @param  array  $xforms An array of transformation names to be applied to $in
-	 * @param  bool   $check  If true, stops any specific url transform from being applied (and thus having the value encoded twice)
-	 * @return string The transformed version of $in (if any transformation needed)
-	 **/
-	protected function xformValue($in, $xforms, $check=true)
+    /**
+     * Allows a set of transformations to be applied to the input
+     *
+     * @param  string $in The value to be transformed
+     * @param  array  $xforms An array of transformation names to be applied to $in
+     * @param  bool   $check  If true, stops any specific url transform from being applied (and thus having the value encoded twice)
+     * @return string The transformed version of $in (if any transformation needed)
+     **/
+    protected function xformValue($in, $xforms, $check=true)
     {
-		$result = $in;
+        $result = $in;
 
-		while (!empty($xforms)) {
-			$xform = trim(strtolower(array_shift($xforms)));
+        while (!empty($xforms)) {
+            $xform = trim(strtolower(array_shift($xforms)));
 
             if (is_numeric($xform)) {
                 // Select an ordinal word from the input string
@@ -317,14 +317,14 @@ class TextformatterTagParser extends Textformatter
                 $this->xform_stack[] = $xform;
                 $result = $this->$xform($result);
             }
-		}
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
 
-	/**
-	 * Transformation handlers...
+    /**
+     * Transformation handlers...
      **/
     public function xformInitial($str)
     {
@@ -389,36 +389,36 @@ class TextformatterTagParser extends Textformatter
 
     public function xformEmail($str)
     {
-		$str = str_replace(array("\r", "<cr>", "<CR>", "<Cr>", "<cR>", "<lf>", "<Lf>", "<lF>", "<LF>", "0x0A", "0x0a", "0x0D", "0x0d", "%0A", "%0a", "%0D", "%0d"), "\n", trim($str)); // \r\n => \n\n & \r => \n
-		$str = str_replace("\n\n", "\n", $str);       // \n\n => \n
-		$p = explode("\n", $str);                     // array of lines split on \r, \n or \r\n
-		return trim($p[0]); // limit output to single line (and trim it too)
-	}
+        $str = str_replace(array("\r", "<cr>", "<CR>", "<Cr>", "<cR>", "<lf>", "<Lf>", "<lF>", "<LF>", "0x0A", "0x0a", "0x0D", "0x0d", "%0A", "%0a", "%0D", "%0d"), "\n", trim($str)); // \r\n => \n\n & \r => \n
+        $str = str_replace("\n\n", "\n", $str);       // \n\n => \n
+        $p = explode("\n", $str);                     // array of lines split on \r, \n or \r\n
+        return trim($p[0]); // limit output to single line (and trim it too)
+    }
 
 
-	public function get($key)
+    public function get($key)
     {
         if ('encode'==$key) {
             $key = 'url';	// encode deprecated but still supported, use 'url' instead.
         }
 
-		return isset($this->data[$key]) ? $this->data[$key] : null;
-	}
+        return isset($this->data[$key]) ? $this->data[$key] : null;
+    }
 
 
-	public function set($key, $value)
+    public function set($key, $value)
     {
         if ('encode'==$key) {
             $key = 'url';
         }
 
-		$this->data[$key] = $value;
-		return $this;
-	}
+        $this->data[$key] = $value;
+        return $this;
+    }
 
 
     public static function getTransformations()
     {
-		return self::$xform_whitelist;
-	}
+        return self::$xform_whitelist;
+    }
 }
