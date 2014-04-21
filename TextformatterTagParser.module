@@ -82,6 +82,9 @@ class TextformatterTagParser extends Textformatter
         'initials',
         'initcaps',
         'thinspaces',
+        'nospaces',
+        'nl2br',
+        'nl2space',
     );
 
 
@@ -328,6 +331,24 @@ class TextformatterTagParser extends Textformatter
     /**
      * Transformation handlers...
      **/
+    public function xformNospaces($str)
+    {
+        return str_replace(' ', '', $str);
+    }
+
+
+    public function xformNl2space($str)
+    {
+        return strtr($str, array("\n"=>'', "\r"=>'', "\r\n"=>''));
+    }
+
+
+    public function xformNl2br($str)
+    {
+        return nl2br($str);
+    }
+
+
     public function xformInitial($str)
     {
         return substr($str, 0, 1);
