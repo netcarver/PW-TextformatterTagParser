@@ -61,6 +61,9 @@ You can chain transformations so: @{page.title>lower>url}@ which will lowercase 
 | initials | Returns the initial letters of each word of the field |
 | initcaps | Returns the initial letters of each word of the field capitalised and postfixed with '.' |
 | thinspaces | Thins out multiple spaces, replacing them with a single space |
+| nospaces | Strips spaces from the field. |
+| nl2br | Converts newlines to html breaks. |
+| nl2space | Converts newlines to spaces; essentially collapsing multiline text. |
 | (integer) _n_ | Select the [*n*][^th^] word from the input string |
 
 You can also specify which of the above are to be applied to *all* the substitutions in a text by setting that transform name to true on the parser (see usage example.)
