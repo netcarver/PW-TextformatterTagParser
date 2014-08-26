@@ -3,14 +3,14 @@
 /**
  * ProcessWire Tag Parser Module
  *
- * Substitutes tags in a given text block with values from a context (or 
+ * Substitutes tags in a given text block with values from a context (or
  * an array of contexts).
  *
- * Each context provider must be an instance of WireData. This means that 
- * almost any object from ProcessWire can be used by the parser to do 
+ * Each context provider must be an instance of WireData. This means that
+ * almost any object from ProcessWire can be used by the parser to do
  * substitutions.
  *
- * Given an input string such as: 
+ * Given an input string such as:
  *
  *   "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
  *
@@ -20,27 +20,27 @@
  *    User: ryan
  *    IP:   127.0.0.1"
  *
- * 
+ *
  * USAGE
  * -----
  *
  * Single context:
- *   $parser = $modules->get("TextformatterTagParser"); 
+ *   $parser = $modules->get("TextformatterTagParser");
  *   $parser
  *     ->set('context', $user)
  *     ->format($string)
  *     ;
  *
  * Multiple contexts:
- *   $parser = $modules->get("TextformatterTagParser"); 
+ *   $parser = $modules->get("TextformatterTagParser");
  *   $parser
  *     ->set('context', array('user'=>$user, 'page'=>$page) )
  *     ->format($string)
  *     ;
  *
  * When using multiple contexts your tags can specify the context
- * to use. For example, {page.name} is more specific than just {name}. If 
- * no context specifier is used in a tag then contexts will be searched 
+ * to use. For example, {page.name} is more specific than just {name}. If
+ * no context specifier is used in a tag then contexts will be searched
  * for a match in the order in which they appear in the context array and
  * the first match will be used for the substitution.
  *
@@ -99,7 +99,7 @@ class TextformatterTagParser extends Textformatter
             'singluar'  => false,
             'autoload'  => false,
             'author'    => 'Netcarver',
-        ); 
+        );
     }
 
 
@@ -154,19 +154,19 @@ class TextformatterTagParser extends Textformatter
 
             if ($tag == 'datetime') {
                 $value = date(wire()->config->dateFormat);
-                $found = true;	
+                $found = true;
 
             } else if (isset($_SERVER[$tag])) {
                 $value = wire()->sanitizer->text($_SERVER[$tag]);
-                $found = true;	
+                $found = true;
 
             } else if (is_array($objs) && !empty($objs)) {
                 $found = false;
 
-                /** 
+                /**
                  * We will search for $tag in the array of WireData objects.
                  *
-                 * Does the tag have a specifier? 
+                 * Does the tag have a specifier?
                  * The tag {user.name} calls for the name parameter from the WireData object indexed as 'user' in the $objs array
                  */
                 if ($specifier) {
@@ -209,10 +209,10 @@ class TextformatterTagParser extends Textformatter
                 $value .= (count($this->xform_stack)) ? " (" . implode(" > ", $this->xform_stack) . ")" : " (verbatim)" ;
             }
 
-            $str = str_replace($matches[0][$key], $value, $str); 	
+            $str = str_replace($matches[0][$key], $value, $str);
         }
 
-        return $str; 
+        return $str;
     }
 
 
@@ -221,12 +221,12 @@ class TextformatterTagParser extends Textformatter
      *
      * Given this input "{specifier.field1|field2>xform1>xform2}" We'd get this as output...
      *
-     *    array( 
+     *    array(
      *      'field1|field2', // A PW selector used to pull the field from part of the context.
-     *      'specifier',     // If present, specifies which part of the context to search first. 
-     *                       // If not present (or not found in a specific context) a search through all 
+     *      'specifier',     // If present, specifies which part of the context to search first.
+     *                       // If not present (or not found in a specific context) a search through all
      *                       // supplied contexts will be performed.
-     *      array(           // An array of transformation names to apply when substituting (if any). 
+     *      array(           // An array of transformation names to apply when substituting (if any).
      *        'xform1',      // These are applied in order, first to last.
      *        'xform2',
      *      ),
@@ -250,7 +250,7 @@ class TextformatterTagParser extends Textformatter
         }
 
         $tag_parts = explode('>', $tag);
-        $tag = array_shift($tag_parts); 
+        $tag = array_shift($tag_parts);
         $xform = $tag_parts;
 
         $result = array($tag, $specifier, $xform);
