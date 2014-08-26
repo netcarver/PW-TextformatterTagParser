@@ -60,6 +60,7 @@ class TextformatterTagParser extends Textformatter
      **/
     protected $data = array(
         'context' => array(),
+        'debug' => false,
     );
 
 
