@@ -60,7 +60,8 @@ class TextformatterTagParser extends Textformatter
      **/
     protected $data = array(
         'context' => array(),
-        'debug' => false,
+        'debug'   => false,
+        'spinkey' => null,
     );
 
 
@@ -93,8 +94,8 @@ class TextformatterTagParser extends Textformatter
     {
         return array(
             'title'     => 'Tag Parser',
-            'version'   => 151,
-            'summary'   => "Substitutes tags in a given text block with values from a context.",
+            'version'   => 200,
+            'summary'   => "Substitutes tags in a given text block with values from a context and/or spins alternative texts from the input.",
             'permanent' => false,
             'singluar'  => false,
             'autoload'  => false,
@@ -115,10 +116,63 @@ class TextformatterTagParser extends Textformatter
     {
         $this->multiple = is_callable('mb_strlen');
         if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
+        $str = $this->spinText($str);
         $str = $this->parseTags($str);
         return $this;
     }
 
+
+    public function UrlToKey($url)
+    {
+        // Split input url into components and drop the variable ones...
+        $url_parts = parse_url($url);
+
+        if (false === $url_parts) {
+            // url was malformed so just use it as it is...
+            $key = $url;
+        } else {
+            unset($url_parts['query']);
+            unset($url_parts['fragment']);
+            $url_parts['scheme'] = 'https';
+            $key = implode('', $url_parts);
+        }
+
+
+        $key = (int) sha1($key);
+        $this->data['spinkey'] = $key;
+        return $key;
+    }
+
+
+    public function spinText($input)
+    {
+        // find the fixed and alternative sections...
+        $parts       = preg_split("/\{\{|\}\}/", $input);
+        $output      = array();
+
+        $key = $this->data['spinkey'];
+        if (null === $key) {
+            $key = mt_rand();
+        }
+
+        // Generate a spin from the given key.
+        mt_srand((int)$key);
+
+        foreach ($parts as $i => $part) {
+            if ($i % 2) {
+                $options = explode('|', $part);
+                $numopts = count($options);
+                $choice  = mt_rand(0, $numopts-1);
+                $output[] = $options[$choice];
+            } else {
+                // processing a fixed part...
+                $output[] = $part;
+            }
+        }
+
+        $output = implode('', $output);
+        return $output;
+    }
 
 
     /**
