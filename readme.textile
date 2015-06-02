@@ -135,8 +135,8 @@ bc. "Dear {{mum|dad|friend}}, {{How are you|What have you been up to|What's your
 
 Spinning happens after contextual substitutions so you can include them in the spinning alternatives...
 
-bc. "since we saw you. {{Is your phone number still {user.phone}|Are you still available on {user.phone}|I think you let
-your plan lapse}}."
+bc. "...since we saw you. {{Is your phone number still {user.phone}?|Are you still available on {user.phone}?|I think you let
+your plan lapse.}}"
 
 h3. Using HannaCode
 
@@ -144,7 +144,7 @@ HannaCode can really help define common alternative blocks that you might want t
 example, if you wanted to spin some adjectives about size you could setup HannaCode to run before the tag parser and use
 some substitutions such as...
 
-bcc. big** => {{big|huge|massive|gigantic}}
+bc.. big** => {{big|huge|massive|gigantic}}
 small** => {{small|tiny|microscopic}}
 
 p. ...and then say things like...
