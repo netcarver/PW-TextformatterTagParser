@@ -2,6 +2,8 @@ h1. Tag Parsing Textformatter Module For ProcessWire
 
 Substitutes tags in a given text block with values from a context (or an array of contexts). Each context provider must be an instance of WireData. This means that almost any object from ProcessWire can be used by the parser to do substitutions.
 
+Version 2.0 adds the ability to semi-randomly generate alternate texts from options embedded within your input.
+
 Given an input string such as: 
 
 bc. "Date: {datetime}\nUser: {name}\nIP:   {REMOTE_ADDR}"
@@ -123,6 +125,46 @@ p. You can setup new contexts on a given parser instance between format() calls.
 h3. Debug output
 
 If you'd like to see a trail of which transformations were applied by the parser do a @$parser->set('debug', true)@ before you call @format()@.
+
+h2. Spinning Alternate Texts
+
+You can have the tag parser select from a set of alternative strings in your input using the following, regex-or like,
+syntax...
+
+bc. "Dear {{mum|dad|friend}}, {{How are you|What have you been up to|What's your news}}?"
+
+Spinning happens after contextual substitutions so you can include them in the spinning alternatives...
+
+bc. "since we saw you. {{Is your phone number still {user.phone}|Are you still available on {user.phone}|I think you let
+your plan lapse}}."
+
+h3. Using HannaCode
+
+HannaCode can really help define common alternative blocks that you might want to use repeatedly in your texts. For
+example, if you wanted to spin some adjectives about size you could setup HannaCode to run before the tag parser and use
+some substitutions such as...
+
+bcc. big** => {{big|huge|massive|gigantic}}
+small** => {{small|tiny|microscopic}}
+
+p. ...and then say things like...
+
+bc. "It was a big** event with a small** budget."
+
+...and get results such as...
+
+bc.. It was a huge event with a tiny budget.
+It was a massive event with a microscopic budget.
+
+h3. Controlling Randomness.
+
+The tag parser allows you to control the degree of randomness used in selecting alternatives used in the spinning
+process. By default each choice is totally random -- every time you visit the page using the tag parser on a field you
+should see a different spin on the message. However, you can fix the result by setting the @spinkey@ to any integer you
+like. Once you do this, you will always get the same generated text. Alternatively, you can set the @spinkey@ to the
+value returned from the @$_SERVER[HTTP_REFERER]@ variable so that visitors from sites linking to your site get one spin
+and visitors coming in from elsewhere get a different spin. Please note that any querystring or fragment parts of the
+URL will influence the spinning of text too unless you pass the referrer URL through the parser's @UrlToKey()@ method first.
 
 h2. Helper Module
 
