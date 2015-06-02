@@ -128,8 +128,7 @@ If you'd like to see a trail of which transformations were applied by the parser
 
 h2. Spinning Alternate Texts
 
-You can have the tag parser select from a set of alternative strings in your input using the following, regex-or like,
-syntax...
+You can have the tag parser select from a set of alternative strings in your input using the following, regex-or like, syntax...
 
 bc. "Dear {{mum|dad|friend}}, {{How are you|What have you been up to|What's your news}}?"
 
@@ -140,9 +139,7 @@ your plan lapse.}}"
 
 h3. Using HannaCode
 
-HannaCode can really help define common alternative blocks that you might want to use repeatedly in your texts. For
-example, if you wanted to spin some adjectives about size you could setup HannaCode to run before the tag parser and use
-some substitutions such as...
+HannaCode can really help define common alternative blocks that you might want to use repeatedly in your texts. For example, if you wanted to spin some adjectives about size you could setup HannaCode to run before the tag parser and use some substitutions such as...
 
 bc.. big** => {{big|huge|massive|gigantic}}
 small** => {{small|tiny|microscopic}}
@@ -158,13 +155,7 @@ It was a massive event with a microscopic budget.
 
 h3. Controlling Randomness.
 
-The tag parser allows you to control the degree of randomness used in selecting alternatives used in the spinning
-process. By default each choice is totally random -- every time you visit the page using the tag parser on a field you
-should see a different spin on the message. However, you can fix the result by setting the @spinkey@ to any integer you
-like. Once you do this, you will always get the same generated text. Alternatively, you can set the @spinkey@ to the
-value returned from the @$_SERVER[HTTP_REFERER]@ variable so that visitors from sites linking to your site get one spin
-and visitors coming in from elsewhere get a different spin. Please note that any querystring or fragment parts of the
-URL will influence the spinning of text too unless you pass the referrer URL through the parser's @UrlToKey()@ method first.
+The tag parser allows you to control the degree of randomness used in selecting alternatives used in the spinning process. By default each choice is totally random -- every time you visit the page using the tag parser on a field you should see a different spin on the message. However, you can fix the result by setting the @spinkey@ to any integer you like. Once you do this, you will always get the same generated text. Alternatively, you can set the @spinkey@ to the value returned from the @$_SERVER[HTTP_REFERER]@ variable so that visitors from sites linking to your site get one spin and visitors coming in from elsewhere get a different spin. Please note that any querystring or fragment parts of the URL will influence the spinning of text too unless you pass the referrer URL through the parser's @UrlToKey()@ method first.
 
 h2. Helper Module
 
