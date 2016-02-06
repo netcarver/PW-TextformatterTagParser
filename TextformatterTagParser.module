@@ -301,6 +301,10 @@ class TextformatterTagParser extends Textformatter
         if (2==$n) {
             $specifier = $tag_parts[0];
             $tag       = $tag_parts[1];
+        } else if ($n > 2) {
+            $specifier = $tag_parts[0];
+            unset($tag_parts[0]);
+            $tag = implode('.', $tag_parts);
         }
 
         $tag_parts = explode('>', $tag);
