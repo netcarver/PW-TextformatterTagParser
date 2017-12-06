@@ -94,10 +94,10 @@ class TextformatterTagParser extends Textformatter
     {
         return array(
             'title'     => 'Tag Parser',
-            'version'   => 200,
+            'version'   => "2.1.0",
             'summary'   => "Substitutes tags in a given text block with values from a context and/or spins alternative texts from the input.",
             'permanent' => false,
-            'singluar'  => false,
+            'singular'  => false,
             'autoload'  => false,
             'author'    => 'Netcarver',
         );
@@ -114,8 +114,15 @@ class TextformatterTagParser extends Textformatter
      **/
     public function format(&$str)
     {
-        $this->multiple = is_callable('mb_strlen');
-        if(empty($this->data['context'])) throw new WireException(_("No context provided for parsing input string."));
+        if(empty($this->data['context'])) {
+            $p = wire('page');
+            if ($p->id) {
+                $this->data['context']['page'] = $p;
+                $this->data['context']['parent'] = $p->parent;
+            } else {
+                throw new WireException(_("No context available for parsing input string."));
+            }
+        }
         $str = $this->spinText($str);
         $str = $this->parseTags($str);
         return $this;
