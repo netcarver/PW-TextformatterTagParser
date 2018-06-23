@@ -93,6 +93,7 @@ class TextformatterTagParser extends Textformatter
         'nospaces',
         'nl2br',
         'nl2space',
+        'name',
     );
 
 
@@ -508,6 +509,16 @@ class TextformatterTagParser extends Textformatter
         $str = str_replace("\n\n", "\n", $str);       // \n\n => \n
         $p = explode("\n", $str);                     // array of lines split on \r, \n or \r\n
         return trim($p[0]); // limit output to single line (and trim it too)
+    }
+
+
+    public function xformName($str)
+    {
+        if (!$formatter = $this->wire('modules')->get('TextformatterNameSanitiserEn')) {
+            return $str;
+        }
+        $formatter->format($str);
+        return $str;
     }
 
 
