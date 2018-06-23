@@ -66,6 +66,12 @@ class TextformatterTagParser extends Textformatter
 
 
     /**
+     * Storage for the stack of transformations to be applied.
+     */
+    protected $xform_stack = array();
+
+
+    /**
      * Global whitelist of allowable transformations.
      *
      * If you extend this list, you will need to supply a transformation handler (see later)
